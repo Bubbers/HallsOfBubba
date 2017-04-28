@@ -1,0 +1,3 @@
+[submodule "bubba-3d"]
+	path = bubba-3d
+	url = https://github.com/bubbers/bubba-3d.git
