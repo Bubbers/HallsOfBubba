@@ -16,6 +16,7 @@ TopDownCamera *camera;
 std::shared_ptr<Scene> scene;
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
+    scene->update(timeSinceLastCall, {});
 }
 
 // Called by the window mainloop
@@ -26,6 +27,24 @@ void display(float timeSinceStart,float timeSinceLastCall) {
 // Called when the window gets resized
 void resize(int newWidth, int newHeight) {
     renderer.resize(newWidth, newHeight);
+}
+
+void createLight() {
+
+    DirectionalLight directionalLight = DirectionalLight();
+    directionalLight.diffuseColor= chag::make_vector(0.50f,0.50f,0.50f);
+    directionalLight.specularColor= chag::make_vector(0.50f,0.50f,0.50f);
+    directionalLight.ambientColor= chag::make_vector(0.50f,0.50f,0.50f);
+
+    directionalLight.direction= -chag::make_vector(0.0f,-10.0f,0.0f);
+    scene->directionalLight = directionalLight;
+
+    PointLight pointLight;
+    pointLight.diffuseColor= chag::make_vector(0.50f,0.50f,0.50f);
+    pointLight.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
+    pointLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    pointLight.position = chag::make_vector(18.0f, 3.0f, 0.0f);
+    scene->pointLights.push_back(pointLight);
 }
 
 void loadWorld() {
@@ -40,6 +59,26 @@ void loadWorld() {
 
     scene = std::make_shared<Scene>();
     scene->addShadowCaster(gameObject);
+
+    // Ground mesh
+    std::shared_ptr<Mesh> floorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/floor.obj");
+
+    std::shared_ptr<GameObject> floorObject = std::make_shared<GameObject>(floorMesh);
+    floorObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
+    StandardRenderer* stdFloorRenderer = new StandardRenderer(floorMesh, standardShader);
+    floorObject->addRenderComponent(stdFloorRenderer);
+
+    scene->addShadowCaster(floorObject);
+
+    // Door mesh
+    std::shared_ptr<Mesh> doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door.obj");
+
+    std::shared_ptr<GameObject> doorObject = std::make_shared<GameObject>(doorMesh);
+    doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
+    StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
+    doorObject->addRenderComponent(stdDoorRenderer);
+
+    scene->addShadowCaster(doorObject);
 }
 
 int main() {
@@ -55,6 +94,7 @@ int main() {
     camera = new TopDownCamera(chag::make_vector(0.0f, 0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT);
 
     loadWorld();
+    createLight();
 
     win->start(60);
 
