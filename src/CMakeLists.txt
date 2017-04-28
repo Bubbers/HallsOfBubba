@@ -3,7 +3,7 @@
 set(GAME_SOURCE_FILES main.cpp)
 
 # Subdirectories
-# add_subdirectory(foo)
+add_subdirectory(cameras)
 
 # Define the executable
 set(EXECUTABLE_NAME HallsOfBubba)
