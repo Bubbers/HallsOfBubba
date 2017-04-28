@@ -6,6 +6,8 @@
 #include <StandardRenderer.h>
 #include <Scene.h>
 #include <Window.h>
+#include <Logger.h>
+#include <StdOutLogHandler.h>
 
 Renderer renderer;
 
@@ -82,6 +84,10 @@ void loadWorld() {
 }
 
 int main() {
+
+    Logger::addLogHandler(new StdOutLogHandler());
+    Logger::setLogLevel(LogLevel::INFO);
+
     Window* win = new Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Halls of Bubba");
 
     // Setup callbacks for window events
