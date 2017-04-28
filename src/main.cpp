@@ -10,6 +10,10 @@
 #include <components/WinOnCollisionComponent.h>
 #include <Logger.h>
 #include <StdOutLogHandler.h>
+#include <ControlsManager.h>
+#include <KeyboardButton.h>
+#include <components/PlayerController.h>
+#include "controls.h"
 
 Renderer renderer;
 
@@ -58,6 +62,7 @@ void loadWorld() {
     std::shared_ptr<Mesh> playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
 
     std::shared_ptr<GameObject> gameObject = std::make_shared<GameObject>(playerMesh);
+    gameObject->addComponent(new PlayerController());
     gameObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
     StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
     gameObject->addRenderComponent(stdrenderer);
@@ -93,6 +98,12 @@ void loadWorld() {
     scene->addShadowCaster(doorObject);
 }
 
+void createKeyListeners() {
+    ControlsManager* cm = ControlsManager::getInstance();
+    cm->addBinding(MOVE_HORIZONTAL, new KeyboardButton(sf::Keyboard::A, sf::Keyboard::D));
+    cm->addBinding(MOVE_VERTICAL, new KeyboardButton(sf::Keyboard::W, sf::Keyboard::S));
+}
+
 int main() {
 
     Logger::addLogHandler(new StdOutLogHandler());
@@ -111,6 +122,7 @@ int main() {
 
     loadWorld();
     createLight();
+    createKeyListeners();
 
     win->start(60);
 
