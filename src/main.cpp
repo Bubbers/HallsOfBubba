@@ -6,6 +6,8 @@
 #include <StandardRenderer.h>
 #include <Scene.h>
 #include <Window.h>
+#include <ColliderFactory.h>
+#include <components/WinOnCollisionComponent.h>
 #include <Logger.h>
 #include <StdOutLogHandler.h>
 
@@ -16,9 +18,11 @@ const int SCREEN_HEIGHT = 480;
 
 TopDownCamera *camera;
 std::shared_ptr<Scene> scene;
+Collider *collider = ColliderFactory::getTwoPhaseCollider();
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
     scene->update(timeSinceLastCall, {});
+    collider->updateCollision(scene.get());
 }
 
 // Called by the window mainloop
@@ -58,6 +62,8 @@ void loadWorld() {
     StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
     gameObject->addRenderComponent(stdrenderer);
     gameObject->setDynamic(true);
+    gameObject->setIdentifier(2);
+    gameObject->addCollidesWith(1);
 
     scene = std::make_shared<Scene>();
     scene->addShadowCaster(gameObject);
@@ -79,6 +85,10 @@ void loadWorld() {
     doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
     StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
     doorObject->addRenderComponent(stdDoorRenderer);
+    doorObject->addComponent(new WinOnCollisionComponent());
+    doorObject->addCollidesWith(2);
+    doorObject->setIdentifier(1);
+    doorObject->setDynamic(true);
 
     scene->addShadowCaster(doorObject);
 }
