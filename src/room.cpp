@@ -30,6 +30,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
     m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
     auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
+    auto playerCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
     m_scene = std::make_shared<Scene>();
@@ -44,10 +45,10 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
 
         auto bulletObject = std::make_shared<GameObject>(bulletMesh);
-        bulletObject->setLocation(shooter->getAbsoluteLocation());
+        bulletObject->setLocation(shooter->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f));
         bulletObject->setRotation(shooter->getAbsoluteRotation());
-        bulletObject->setScale(chag::make_vector(2.0f,2.0f,2.0f));
-        bulletObject->addComponent(new TimedLife(10.0f));
+        bulletObject->setScale(chag::make_vector(3.0f,3.0f,3.0f));
+        bulletObject->addComponent(new TimedLife(20.0f));
         bulletObject->addComponent(new MoveComponent(
                 chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
                 direction * 10,
@@ -78,7 +79,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
     createWalls();
 
-    auto playerObject = std::make_shared<GameObject>(playerMesh);
+    auto playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
     playerObject->addComponent(new PlayerController(spawnBullet, camera.get()));
     HealthComponent *playerHealth = new HealthComponent(2);
     allAlive.push_back(playerHealth);
@@ -91,7 +92,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
     m_scene->addShadowCaster(playerObject);
     //Enemy mesh
-    auto monsterObject = std::make_shared<GameObject>(monsterMesh);
+    auto monsterObject = std::make_shared<GameObject>(monsterMesh, playerCollisionMesh);
     HealthComponent *monsterHealth = new HealthComponent(2);
     monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
     allAlive.push_back(monsterHealth);
