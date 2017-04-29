@@ -5,6 +5,7 @@
 #include <Collider.h>
 #include <Camera.h>
 #include <Renderer.h>
+#include <AudioManager.h>
 
 class Room {
 
@@ -24,4 +25,6 @@ private:
 
     std::shared_ptr<Scene> m_scene;
     std::shared_ptr<Collider> m_collider;
+
+    std::shared_ptr<sf::Sound> m_shootSound;
 };

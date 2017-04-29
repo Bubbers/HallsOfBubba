@@ -7,16 +7,21 @@
 
 
 #include <IComponent.h>
+#include <AudioManager.h>
 
 class HealthComponent : public IComponent {
 
 public:
+    HealthComponent();
 
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
     virtual void update(float dt);
 
 private:
     int health = 2;
+
+    std::shared_ptr<sf::Sound> m_deathSound;
+    std::shared_ptr<sf::Sound> m_hurtSound;
 };
 
 

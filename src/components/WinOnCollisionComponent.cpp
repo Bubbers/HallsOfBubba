@@ -1,8 +1,8 @@
 #include <ObjectIdentifiers.h>
 #include "WinOnCollisionComponent.h"
 
-WinOnCollisionComponent::WinOnCollisionComponent(std::shared_ptr<Scene> scene) :scene(scene){
-
+WinOnCollisionComponent::WinOnCollisionComponent(std::shared_ptr<Scene> scene) :scene(scene) {
+     m_sound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/win.wav"));
 }
 
 void WinOnCollisionComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
@@ -14,6 +14,7 @@ void WinOnCollisionComponent::beforeCollision(std::shared_ptr<GameObject> collid
     }
     if(collider->getIdentifier() == PLAYER_IDENTIFIER && numEnemies == 0) {
         printf("WIN\n");
+        m_sound->play();
     }
 }
 
