@@ -10,7 +10,7 @@
 #include <components/WinOnCollisionComponent.h>
 #include <ui/HealthBar.h>
 #include <components/TimedLife.h>
-
+#include <components/DirtyBulletOnCollision.h>
 #include "room.h"
 
 Room::Room()
@@ -58,14 +58,19 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         int shootId = 0;
         if (shooter->getIdentifier() == PLAYER_IDENTIFIER) {
             shootId = PLAYER_SPAWNED_BULLET;
+            bulletObject->addCollidesWith(ENEMY_IDENTIFIER);
         } else {
             shootId = ENEMY_SPAWNED_BULLET;
+            bulletObject->addCollidesWith(PLAYER_IDENTIFIER);
         }
         bulletObject->setIdentifier(shootId);
+        bulletObject->addCollidesWith({DOOR_IDENTIFIER, OBSTACLE_IDENTIFIER, WALL_IDENTIFIER});
+        bulletObject->addComponent(new DirtyBulletOnCollision());
 
         bulletObject->update(0);
         StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
         bulletObject->addRenderComponent(stdRenderer);
+        bulletObject->setDynamic(true);
 
         m_scene->addShadowCaster(bulletObject);
         m_shootSound->play();
@@ -83,8 +88,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     playerObject->addRenderComponent(stdrenderer);
     playerObject->setDynamic(true);
     playerObject->setIdentifier(PLAYER_IDENTIFIER);
-    playerObject->addCollidesWith(DOOR_IDENTIFIER);
-    playerObject->addCollidesWith(ENEMY_SPAWNED_BULLET);
+    playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
     m_scene->addShadowCaster(playerObject);
     //Enemy mesh
     auto monsterObject = std::make_shared<GameObject>(monsterMesh);
@@ -125,6 +129,16 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     doorObject->setIdentifier(DOOR_IDENTIFIER);
 
     m_scene->addShadowCaster(doorObject);
+
+    // Obstacle mesh
+    auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
+
+    auto obstacleObject = std::make_shared<GameObject>(obstacleMesh);
+    obstacleObject->setLocation(chag::make_vector(-5.0f, 0.0f, 5.0f));
+    StandardRenderer* stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
+    obstacleObject->addRenderComponent(stdObstacleRenderer);
+    obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
+    m_scene->addShadowCaster(obstacleObject);
 
     // HUD
     std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();

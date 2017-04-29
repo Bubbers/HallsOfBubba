@@ -17,10 +17,15 @@ public:
 
     virtual void update(float dt) override;
 
+    void beforeCollision(std::shared_ptr<GameObject> collider) override;
+
+    void duringCollision(std::shared_ptr<GameObject> collider) override;
+
 private:
     std::function<void(GameObject*)> spawnBulletFunc;
     Camera *camera;
     float timeSinceLastShot = 1.0f;
+    chag::float3 locationAtLastUpdate;
 
     chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
 };

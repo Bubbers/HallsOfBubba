@@ -4,5 +4,6 @@ set(GAME_SOURCE_FILES
         components/HealthComponent.cpp
         components/EnemyComponent.cpp
         components/TimedLife.cpp
+        components/DirtyBulletOnCollision.cpp
         ${GAME_SOURCE_FILES}
         PARENT_SCOPE)

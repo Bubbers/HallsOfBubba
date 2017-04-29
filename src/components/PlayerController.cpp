@@ -65,6 +65,7 @@ void PlayerController::update(float dt) {
     ControlStatus horizontalStatus = cm->getStatus(MOVE_HORIZONTAL);
     ControlStatus verticalStatus = cm->getStatus(MOVE_VERTICAL);
     chag::float3 prevLocation = owner->getRelativeLocation();
+    locationAtLastUpdate = owner->getRelativeLocation();
     if(horizontalStatus.isActive()){
         prevLocation.x += horizontalStatus.getValue() / 100.0f * dt * 3.0f;
     }
@@ -93,4 +94,12 @@ void PlayerController::update(float dt) {
     }
 
     owner->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
+}
+
+void PlayerController::beforeCollision(std::shared_ptr<GameObject> collider) {
+    owner->setLocation(locationAtLastUpdate);
+}
+
+void PlayerController::duringCollision(std::shared_ptr<GameObject> collider) {
+    owner->setLocation(locationAtLastUpdate);
 }
