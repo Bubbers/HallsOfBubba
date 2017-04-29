@@ -67,10 +67,10 @@ void PlayerController::update(float dt) {
     chag::float3 prevLocation = owner->getRelativeLocation();
     locationAtLastUpdate = owner->getRelativeLocation();
     if(horizontalStatus.isActive()){
-        prevLocation.x += horizontalStatus.getValue() / 100.0f * dt * 3.0f;
+        prevLocation.x += horizontalStatus.getValue() / 30.0f * dt * 3.0f;
     }
     if(verticalStatus.isActive()){
-        prevLocation.z += verticalStatus.getValue() / 100.0f * dt * 3.0f;
+        prevLocation.z += verticalStatus.getValue() / 30.0f * dt * 3.0f;
     }
     owner->setLocation(prevLocation);
 

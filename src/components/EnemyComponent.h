@@ -15,9 +15,16 @@ public:
     EnemyComponent(std::function<void(GameObject*)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
     virtual void update(float dt);
 
+    void beforeCollision(std::shared_ptr<GameObject> collider) override;
+
+    void duringCollision(std::shared_ptr<GameObject> collider) override;
+
 private:
     std::function<void(GameObject*)> bulletSpawner;
     std::shared_ptr<GameObject> playerObject;
+    chag::float3 locationAtLastUpdate;
+    float previousXSpeed = 0;
+    float previousYSpeed = 0;
 
     void orientEnemyTowardsPlayer() const;
 };
