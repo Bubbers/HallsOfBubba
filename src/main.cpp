@@ -64,6 +64,7 @@ void spawnBullet(GameObject *shooter){
             chag::make_vector(0.0f, 0.0f, 0.0f)
     ));
     bulletObject->setIdentifier(shooter->getIdentifier() == PLAYER_IDENTIFIER ? PLAYER_SPAWNED_BULLET : ENEMY_SPAWNED_BULLET);
+    bulletObject->update(0);
     StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
     bulletObject->addRenderComponent(stdRenderer);
 
@@ -139,7 +140,7 @@ void loadWorld() {
     doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
     StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
     doorObject->addRenderComponent(stdDoorRenderer);
-    doorObject->addComponent(new WinOnCollisionComponent());
+    doorObject->addComponent(new WinOnCollisionComponent(scene));
     doorObject->setIdentifier(DOOR_IDENTIFIER);
 
     scene->addShadowCaster(doorObject);

@@ -3,12 +3,16 @@
 
 
 #include <IComponent.h>
+#include <Scene.h>
 
 class WinOnCollisionComponent: public IComponent {
 public:
-    WinOnCollisionComponent();
+    WinOnCollisionComponent(std::shared_ptr<Scene> scene);
     void beforeCollision(std::shared_ptr<GameObject> collider);
     void update(float dt);
+
+private:
+    std::shared_ptr<Scene> scene;
 };
 
 
