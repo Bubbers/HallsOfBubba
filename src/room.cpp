@@ -211,9 +211,9 @@ void Room::display(Renderer &renderer,
 void Room::createLight() {
 
     DirectionalLight directionalLight = DirectionalLight();
-    directionalLight.diffuseColor= chag::make_vector(0.50f,0.50f,0.50f);
-    directionalLight.specularColor= chag::make_vector(0.50f,0.50f,0.50f);
-    directionalLight.ambientColor= chag::make_vector(0.50f,0.50f,0.50f);
+    directionalLight.diffuseColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight.specularColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
 
     directionalLight.direction= -chag::make_vector(0.0f,-10.0f,0.0f);
     m_scene->directionalLight = directionalLight;

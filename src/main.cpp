@@ -54,6 +54,7 @@ int main() {
     win->setIdleMethod(idle);
     win->setDisplayMethod(display);
 
+    renderer.setBackgroundColor(chag::make_vector(0.0f,0.0f,0.0f));
     renderer.initRenderer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     camera = std::make_shared<TopDownCamera>(chag::make_vector(0.0f, 0.0f, 0.0f),
