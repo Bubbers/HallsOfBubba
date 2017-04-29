@@ -7,9 +7,7 @@
 #include <KeyboardButton.h>
 #include <MouseButton.h>
 #include <Renderer.h>
-
 #include "cameras/TopDownCamera.h"
-
 #include "room.h"
 #include "controls.h"
 #include "ObjectIdentifiers.h"
@@ -21,7 +19,6 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 std::shared_ptr<TopDownCamera> camera;
-
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
     room->update(timeSinceLastCall);
@@ -63,7 +60,7 @@ int main() {
                                              SCREEN_HEIGHT);
 
     room = std::make_shared<Room>();
-    room->load();
+    room->load(camera);
 
     createKeyListeners();
 

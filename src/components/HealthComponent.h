@@ -12,11 +12,19 @@ class HealthComponent : public IComponent {
 
 public:
 
+    HealthComponent(int maxHealth);
+
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
     virtual void update(float dt);
+    void addDamageListener(std::function<void(int)> damageListener);
+
+    int getMaxHealth();
+    int getHealth();
 
 private:
-    int health = 2;
+    int health;
+    int maxHealth;
+    std::vector<std::function<void(int)>> damageListeners;
 };
 
 

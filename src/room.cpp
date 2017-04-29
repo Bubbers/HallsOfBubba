@@ -8,6 +8,7 @@
 #include <components/HealthComponent.h>
 #include <components/EnemyComponent.h>
 #include <components/WinOnCollisionComponent.h>
+#include <ui/HealthBar.h>
 
 #include "room.h"
 
@@ -19,7 +20,7 @@ Room::~Room()
 {
 }
 
-void Room::load() {
+void Room::load(std::shared_ptr<TopDownCamera> camera) {
     m_collider = std::shared_ptr<Collider>(ColliderFactory::getTwoPhaseCollider());
 
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
@@ -66,7 +67,9 @@ void Room::load() {
 
     auto playerObject = std::make_shared<GameObject>(playerMesh);
     playerObject->addComponent(new PlayerController(spawnBullet));
-    playerObject->addComponent(new HealthComponent());
+    HealthComponent *playerHealth = new HealthComponent(2);
+    allAlive.push_back(playerHealth);
+    playerObject->addComponent(playerHealth);
     playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
     StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
     playerObject->addRenderComponent(stdrenderer);
@@ -74,12 +77,12 @@ void Room::load() {
     playerObject->setIdentifier(PLAYER_IDENTIFIER);
     playerObject->addCollidesWith(DOOR_IDENTIFIER);
     playerObject->addCollidesWith(ENEMY_SPAWNED_BULLET);
-
     m_scene->addShadowCaster(playerObject);
 
     //Enemy mesh
     auto monsterObject = std::make_shared<GameObject>(monsterMesh);
-    monsterObject->addComponent(new HealthComponent());
+    HealthComponent *monsterHealth = new HealthComponent(2);
+    monsterObject->addComponent(monsterHealth);
     monsterObject->addComponent(new EnemyComponent(spawnBullet));
     monsterObject->setLocation(chag::make_vector(-8.0f, 0.0f, 8.0f));
     monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f),
@@ -115,12 +118,36 @@ void Room::load() {
 
     m_scene->addShadowCaster(doorObject);
 
+    // HUD
+    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
+    hudRenderer = new HudRenderer();
+    hudRenderer->setWorldCamera(camera.get());
+    hudObj->addRenderComponent(hudRenderer);
+    HealthBar* playerHealthBar = new HealthBar(playerHealth);
+    hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
+    HealthBar* monsterHealthBar = new HealthBar(monsterHealth);
+    hudRenderer->addRelativeLayout(monsterObject, monsterHealthBar);
+
+    m_scene->addTransparentObject(hudObj);
+
     createLight();
 }
 
 void Room::update(float dt) {
+
+    bool someoneDied = false;
+    for(auto it = allAlive.begin(); it < allAlive.end(); it++){
+        if((*it)->getHealth() <= 0){
+            it = allAlive.erase(it);
+            someoneDied = true;
+        }
+    }
+    if(someoneDied) {
+        hudRenderer->updateLayout();
+    }
     m_scene->update(dt);
     m_collider->updateCollision(m_scene.get());
+
 }
 
 void Room::display(Renderer &renderer,
