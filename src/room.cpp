@@ -158,6 +158,16 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
     m_scene->addShadowCaster(obstacleObject);
 
+    auto torchMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/torch.obj");
+
+    auto torchObject = std::make_shared<GameObject>(torchMesh);
+    torchObject->setLocation(chag::make_vector(-11.0f, 0.0f, -11.0f));
+    torchObject->setScale(chag::make_vector(5.0f, 5.0f, 5.0f));
+    StandardRenderer *stdTorchRenderer = new StandardRenderer(torchMesh, standardShader);
+    torchObject->addRenderComponent(stdTorchRenderer);
+    torchObject->setIdentifier(OBSTACLE_IDENTIFIER);
+    m_scene->addShadowCaster(torchObject);
+
     // HUD
     std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
     hudRenderer = new HudRenderer();
@@ -241,6 +251,6 @@ void Room::createLight() {
     pointLight.diffuseColor= chag::make_vector(0.50f,0.50f,0.50f);
     pointLight.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
     pointLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
-    pointLight.position = chag::make_vector(18.0f, 3.0f, 0.0f);
+    pointLight.position = chag::make_vector(-11.0f, 2.0f, -11.0f);
     m_scene->pointLights.push_back(pointLight);
 }
