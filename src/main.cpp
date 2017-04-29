@@ -15,6 +15,7 @@
 #include <components/PlayerController.h>
 #include <components/HealthComponent.h>
 #include <MouseButton.h>
+#include <components/EnemyComponent.h>
 #include "controls.h"
 #include "ObjectIdentifiers.h"
 
@@ -44,12 +45,17 @@ void resize(int newWidth, int newHeight) {
     renderer.resize(newWidth, newHeight);
 }
 
-void spawnBullet(chag::float3 direction, chag::float3 position){
+void spawnBullet(GameObject *shooter){
+
+    chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
+    chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
+    chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
+
     std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
     std::shared_ptr<Mesh> bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
 
     std::shared_ptr<GameObject> bulletObject = std::make_shared<GameObject>(bulletMesh);
-    bulletObject->setLocation(position);
+    bulletObject->setLocation(shooter->getAbsoluteLocation());
     bulletObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
     bulletObject->addComponent(new MoveComponent(
             chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
@@ -57,7 +63,7 @@ void spawnBullet(chag::float3 direction, chag::float3 position){
             chag::make_vector(0.0f, 0.0f, 0.0f),
             chag::make_vector(0.0f, 0.0f, 0.0f)
     ));
-    bulletObject->setIdentifier(ENEMY_SPAWNED_BULLET);
+    bulletObject->setIdentifier(shooter->getIdentifier() == PLAYER_IDENTIFIER ? PLAYER_SPAWNED_BULLET : ENEMY_SPAWNED_BULLET);
     StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
     bulletObject->addRenderComponent(stdRenderer);
 
@@ -85,6 +91,7 @@ void createLight() {
 void loadWorld() {
     std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
     std::shared_ptr<Mesh> playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
+    std::shared_ptr<Mesh> monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
     std::shared_ptr<GameObject> playerObject = std::make_shared<GameObject>(playerMesh);
     playerObject->addComponent(new PlayerController(spawnBullet));
@@ -99,6 +106,21 @@ void loadWorld() {
 
     scene = std::make_shared<Scene>();
     scene->addShadowCaster(playerObject);
+
+    //Enemy mesh
+    std::shared_ptr<GameObject> monsterObject = std::make_shared<GameObject>(monsterMesh);
+    monsterObject->addComponent(new HealthComponent());
+    monsterObject->addComponent(new EnemyComponent(spawnBullet));
+    monsterObject->setLocation(chag::make_vector(-8.0f, 0.0f, 8.0f));
+    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f),-6*M_PI/5));
+    StandardRenderer *stdMonsterRenderer = new StandardRenderer(monsterMesh, standardShader);
+    monsterObject->addRenderComponent(stdMonsterRenderer);
+    monsterObject->setDynamic(true);
+    monsterObject->setIdentifier(ENEMY_IDENTIFIER);
+    monsterObject->addCollidesWith(PLAYER_SPAWNED_BULLET);
+
+    scene->addShadowCaster(monsterObject);
+
 
     // Ground mesh
     std::shared_ptr<Mesh> floorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/floor.obj");

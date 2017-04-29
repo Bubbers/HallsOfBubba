@@ -7,7 +7,7 @@
 #include "PlayerController.h"
 
 
-PlayerController::PlayerController(std::function<void(chag::float3, chag::float3)> spawnBulletFunc) : spawnBulletFunc(spawnBulletFunc){
+PlayerController::PlayerController(std::function<void(GameObject*)> spawnBulletFunc) : spawnBulletFunc(spawnBulletFunc){
 
 }
 
@@ -26,10 +26,6 @@ void PlayerController::update(float dt) {
 
     ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON);
     if(shootButton.isActive()) {
-        chag::float4x4 rotationMatrix = chag::makematrix(owner->getAbsoluteRotation());
-        chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
-        chag::float4 currentDirection = rotationMatrix * startDirection;
-
-        spawnBulletFunc(chag::make_vector3(currentDirection), owner->getAbsoluteLocation());
+        spawnBulletFunc(owner);
     }
 }
