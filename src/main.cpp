@@ -42,7 +42,7 @@ void createKeyListeners() {
 }
 
 int main() {
-
+    srand(time(NULL));
 
     Logger::addLogHandler(new StdOutLogHandler());
     Logger::setLogLevel(LogLevel::INFO);

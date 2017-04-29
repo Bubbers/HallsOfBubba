@@ -11,6 +11,10 @@
 #include <ui/HealthBar.h>
 #include <components/TimedLife.h>
 #include <components/DirtyBulletOnCollision.h>
+#include <ParticleGenerator.h>
+#include <ParticleRenderer.h>
+#include <particles/BackgroundParticle.h>
+#include <particles/TorchParticle.h>
 #include "room.h"
 
 Room::Room()
@@ -183,6 +187,30 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     m_scene->addTransparentObject(hudObj);
 
     createLight();
+
+    // Cool background effect
+    std::shared_ptr<Texture> particleTexture = ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png");
+
+    std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+    std::shared_ptr<BackgroundParticle> backgroundParticleConf = std::make_shared<BackgroundParticle>();
+
+    ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
+    GameObject *particleGenerator = new GameObject(floorObject.get());
+    particleGenerator->addRenderComponent(gen);
+    particleGenerator->setLocation(make_vector(4.0f, -20.0f, 12.5f));
+    floorObject->addChild(particleGenerator);
+
+    // torch particles
+    std::shared_ptr<ParticleRenderer> torchParticleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+    std::shared_ptr<TorchParticle> torchParticleConf = std::make_shared<TorchParticle>();
+
+    ParticleGenerator *torchParticleGenerator = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
+    GameObject *particleGeneratorObject = new GameObject(torchObject.get());
+    particleGeneratorObject->addRenderComponent(torchParticleGenerator);
+    particleGeneratorObject->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+    particleGeneratorObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
+    torchObject->addChild(particleGeneratorObject);
+
 }
 
 void Room::createWalls() {
