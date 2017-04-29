@@ -7,7 +7,8 @@
 
 enum Controls : int {
     MOVE_VERTICAL,
-    MOVE_HORIZONTAL
+    MOVE_HORIZONTAL,
+    SHOOT_BUTTON
 };
 
 #endif //HALLSOFBUBBA_CONTROLS_H_H

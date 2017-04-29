@@ -14,6 +14,7 @@
 #include <KeyboardButton.h>
 #include <components/PlayerController.h>
 #include <components/HealthComponent.h>
+#include <MouseButton.h>
 #include "controls.h"
 #include "ObjectIdentifiers.h"
 
@@ -43,6 +44,26 @@ void resize(int newWidth, int newHeight) {
     renderer.resize(newWidth, newHeight);
 }
 
+void spawnBullet(chag::float3 direction, chag::float3 position){
+    std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
+    std::shared_ptr<Mesh> bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
+
+    std::shared_ptr<GameObject> bulletObject = std::make_shared<GameObject>(bulletMesh);
+    bulletObject->setLocation(position);
+    bulletObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
+    bulletObject->addComponent(new MoveComponent(
+            chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
+            direction,
+            chag::make_vector(0.0f, 0.0f, 0.0f),
+            chag::make_vector(0.0f, 0.0f, 0.0f)
+    ));
+    bulletObject->setIdentifier(ENEMY_SPAWNED_BULLET);
+    StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
+    bulletObject->addRenderComponent(stdRenderer);
+
+    scene->addShadowCaster(bulletObject);
+}
+
 void createLight() {
 
     DirectionalLight directionalLight = DirectionalLight();
@@ -66,7 +87,7 @@ void loadWorld() {
     std::shared_ptr<Mesh> playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
 
     std::shared_ptr<GameObject> playerObject = std::make_shared<GameObject>(playerMesh);
-    playerObject->addComponent(new PlayerController());
+    playerObject->addComponent(new PlayerController(spawnBullet));
     playerObject->addComponent(new HealthComponent());
     playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
     StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
@@ -97,8 +118,7 @@ void loadWorld() {
     StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
     doorObject->addRenderComponent(stdDoorRenderer);
     doorObject->addComponent(new WinOnCollisionComponent());
-    //doorObject->addCollidesWith(PLAYER_IDENTIFIER);
-    doorObject->setIdentifier(ENEMY_SPAWNED_BULLET);
+    doorObject->setIdentifier(DOOR_IDENTIFIER);
 
     scene->addShadowCaster(doorObject);
 }
@@ -107,6 +127,7 @@ void createKeyListeners() {
     ControlsManager* cm = ControlsManager::getInstance();
     cm->addBinding(MOVE_HORIZONTAL, new KeyboardButton(sf::Keyboard::A, sf::Keyboard::D));
     cm->addBinding(MOVE_VERTICAL, new KeyboardButton(sf::Keyboard::W, sf::Keyboard::S));
+    cm->addBinding(SHOOT_BUTTON, new MouseButton(sf::Mouse::Left));
 }
 
 int main() {

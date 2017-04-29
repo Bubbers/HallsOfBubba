@@ -11,8 +11,12 @@
 class PlayerController : public IComponent {
 
 public:
-    virtual void update(float dt);
+    PlayerController(std::function<void(chag::float3, chag::float3)> spawnBulletFunc);
 
+    virtual void update(float dt) override;
+
+private:
+    std::function<void(chag::float3, chag::float3)> spawnBulletFunc;
 };
 
 
