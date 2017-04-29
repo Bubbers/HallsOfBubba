@@ -12,12 +12,14 @@
 class EnemyComponent : public IComponent {
 
 public:
-    EnemyComponent(std::function<void(GameObject*)> bulletSpawner);
+    EnemyComponent(std::function<void(GameObject*)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
     virtual void update(float dt);
 
 private:
     std::function<void(GameObject*)> bulletSpawner;
+    std::shared_ptr<GameObject> playerObject;
 
+    void orientEnemyTowardsPlayer() const;
 };
 
 
