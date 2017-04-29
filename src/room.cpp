@@ -82,11 +82,11 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     //Enemy mesh
     auto monsterObject = std::make_shared<GameObject>(monsterMesh);
     HealthComponent *monsterHealth = new HealthComponent(2);
+    allAlive.push_back(monsterHealth);
     monsterObject->addComponent(monsterHealth);
     monsterObject->addComponent(new EnemyComponent(spawnBullet));
     monsterObject->setLocation(chag::make_vector(-8.0f, 0.0f, 8.0f));
-    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f),
-                                                                -6*M_PI/5));
+    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f), -6*M_PI/5));
     StandardRenderer *stdMonsterRenderer = new StandardRenderer(monsterMesh, standardShader);
     monsterObject->addRenderComponent(stdMonsterRenderer);
     monsterObject->setDynamic(true);
