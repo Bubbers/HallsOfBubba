@@ -71,6 +71,8 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         m_shootSound->play();
     };
 
+    createWalls();
+
     auto playerObject = std::make_shared<GameObject>(playerMesh);
     playerObject->addComponent(new PlayerController(spawnBullet, camera.get()));
     HealthComponent *playerHealth = new HealthComponent(2);
@@ -137,6 +139,33 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     m_scene->addTransparentObject(hudObj);
 
     createLight();
+}
+
+void Room::createWalls() {
+
+    auto wallMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/wall.obj");
+    auto upVect = chag::make_vector(0.0f, 1.0f, 0.0f);
+
+    chag::SmallVector3<float> wallPos[] = {
+        chag::make_vector(-12.5f,  0.0f,  12.5f),
+        chag::make_vector(-12.5f,  0.0f,  12.5f),
+        chag::make_vector( 12.5f,  0.0f, -12.5f),
+        chag::make_vector( 12.5f,  0.0f, -12.5f)
+    };
+
+    for (int rotMult = 0; rotMult < 4; ++rotMult) {
+
+        auto wallGob = std::make_shared<GameObject>(wallMesh, wallMesh);
+
+        wallGob->setScale(chag::make_vector(25.0f, 4.0f, 1.0f));
+
+        wallGob->setLocation(wallPos[rotMult]);
+        auto rotationQuat = chag::make_quaternion_axis_angle(upVect, M_PI_2 * rotMult);
+        wallGob->setRotation(rotationQuat);
+
+        wallGob->setIdentifier(WALL_IDENTIFIER);
+        m_scene->addShadowCaster(wallGob);
+    }
 }
 
 void Room::update(float dt) {

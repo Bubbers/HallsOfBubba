@@ -25,6 +25,7 @@ public:
 
 private:
     void createLight();
+    void createWalls();
 
     std::shared_ptr<Scene> m_scene;
     std::shared_ptr<Collider> m_collider;
