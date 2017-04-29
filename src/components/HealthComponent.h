@@ -7,11 +7,11 @@
 
 
 #include <IComponent.h>
+#include <AudioManager.h>
 
 class HealthComponent : public IComponent {
 
 public:
-
     HealthComponent(int maxHealth);
 
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
@@ -25,6 +25,9 @@ private:
     int health;
     int maxHealth;
     std::vector<std::function<void(int)>> damageListeners;
+
+    std::shared_ptr<sf::Sound> m_deathSound;
+    std::shared_ptr<sf::Sound> m_hurtSound;
 };
 
 

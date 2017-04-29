@@ -26,6 +26,8 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
+
+    m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
     auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
@@ -63,6 +65,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         bulletObject->addRenderComponent(stdRenderer);
 
         m_scene->addShadowCaster(bulletObject);
+        m_shootSound->play();
     };
 
     auto playerObject = std::make_shared<GameObject>(playerMesh);

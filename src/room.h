@@ -3,8 +3,8 @@
 
 #include <Scene.h>
 #include <Collider.h>
-#include <Camera.h>
 #include <Renderer.h>
+#include <AudioManager.h>
 #include <cameras/TopDownCamera.h>
 
 class HudRenderer;
@@ -32,4 +32,5 @@ private:
     HudRenderer* hudRenderer;
     std::vector<HealthComponent*> allAlive;
 
+    std::shared_ptr<sf::Sound> m_shootSound;
 };

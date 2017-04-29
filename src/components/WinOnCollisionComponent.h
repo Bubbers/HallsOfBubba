@@ -4,6 +4,7 @@
 
 #include <IComponent.h>
 #include <Scene.h>
+#include <AudioManager.h>
 
 class WinOnCollisionComponent: public IComponent {
 public:
@@ -13,6 +14,8 @@ public:
 
 private:
     std::shared_ptr<Scene> scene;
+
+    std::shared_ptr<sf::Sound> m_sound;
 };
 
 
