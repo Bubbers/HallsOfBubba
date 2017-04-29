@@ -191,7 +191,7 @@ void Room::createWalls() {
 
         auto wallGob = std::make_shared<GameObject>(wallMesh, wallMesh);
 
-        wallGob->setScale(chag::make_vector(25.0f, 4.0f, 1.0f));
+        wallGob->setScale(chag::make_vector(30.0f, 4.0f, 1.0f));
 
         wallGob->setLocation(wallPos[rotMult]);
         auto rotationQuat = chag::make_quaternion_axis_angle(upVect, M_PI_2 * rotMult);
