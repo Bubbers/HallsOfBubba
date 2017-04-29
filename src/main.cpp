@@ -13,7 +13,9 @@
 #include <ControlsManager.h>
 #include <KeyboardButton.h>
 #include <components/PlayerController.h>
+#include <components/HealthComponent.h>
 #include "controls.h"
+#include "ObjectIdentifiers.h"
 
 Renderer renderer;
 
@@ -25,8 +27,10 @@ std::shared_ptr<Scene> scene;
 Collider *collider = ColliderFactory::getTwoPhaseCollider();
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
-    scene->update(timeSinceLastCall, {});
+
+    scene->update(timeSinceLastCall);
     collider->updateCollision(scene.get());
+
 }
 
 // Called by the window mainloop
@@ -61,17 +65,19 @@ void loadWorld() {
     std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
     std::shared_ptr<Mesh> playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
 
-    std::shared_ptr<GameObject> gameObject = std::make_shared<GameObject>(playerMesh);
-    gameObject->addComponent(new PlayerController());
-    gameObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
+    std::shared_ptr<GameObject> playerObject = std::make_shared<GameObject>(playerMesh);
+    playerObject->addComponent(new PlayerController());
+    playerObject->addComponent(new HealthComponent());
+    playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
     StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
-    gameObject->addRenderComponent(stdrenderer);
-    gameObject->setDynamic(true);
-    gameObject->setIdentifier(2);
-    gameObject->addCollidesWith(1);
+    playerObject->addRenderComponent(stdrenderer);
+    playerObject->setDynamic(true);
+    playerObject->setIdentifier(PLAYER_IDENTIFIER);
+    playerObject->addCollidesWith(DOOR_IDENTIFIER);
+    playerObject->addCollidesWith(ENEMY_SPAWNED_BULLET);
 
     scene = std::make_shared<Scene>();
-    scene->addShadowCaster(gameObject);
+    scene->addShadowCaster(playerObject);
 
     // Ground mesh
     std::shared_ptr<Mesh> floorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/floor.obj");
@@ -91,9 +97,8 @@ void loadWorld() {
     StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
     doorObject->addRenderComponent(stdDoorRenderer);
     doorObject->addComponent(new WinOnCollisionComponent());
-    doorObject->addCollidesWith(2);
-    doorObject->setIdentifier(1);
-    doorObject->setDynamic(true);
+    //doorObject->addCollidesWith(PLAYER_IDENTIFIER);
+    doorObject->setIdentifier(ENEMY_SPAWNED_BULLET);
 
     scene->addShadowCaster(doorObject);
 }

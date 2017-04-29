@@ -1,6 +1,6 @@
 
 # Files to compile
-set(GAME_SOURCE_FILES main.cpp controls.h)
+set(GAME_SOURCE_FILES main.cpp controls.h ObjectIdentifiers.h)
 
 # Subdirectories
 add_subdirectory(cameras)
