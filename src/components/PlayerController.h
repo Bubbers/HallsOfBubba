@@ -12,12 +12,16 @@
 class PlayerController : public IComponent {
 
 public:
-    PlayerController(std::function<void(GameObject*)> spawnBulletFunc);
+    PlayerController(std::function<void(GameObject*)> spawnBulletFunc, Camera *camera);
+    chag::float3 getPlaneIntersectionPoint();
 
     virtual void update(float dt) override;
 
 private:
     std::function<void(GameObject*)> spawnBulletFunc;
+    Camera *camera;
+
+    chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
 };
 
 

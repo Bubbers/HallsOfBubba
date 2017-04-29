@@ -45,7 +45,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         bulletObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
         bulletObject->addComponent(new MoveComponent(
                 chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
-                direction,
+                direction * 10,
                 chag::make_vector(0.0f, 0.0f, 0.0f),
                 chag::make_vector(0.0f, 0.0f, 0.0f)
         ));
@@ -66,7 +66,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     };
 
     auto playerObject = std::make_shared<GameObject>(playerMesh);
-    playerObject->addComponent(new PlayerController(spawnBullet));
+    playerObject->addComponent(new PlayerController(spawnBullet, camera.get()));
     HealthComponent *playerHealth = new HealthComponent(2);
     allAlive.push_back(playerHealth);
     playerObject->addComponent(playerHealth);
