@@ -73,9 +73,13 @@ void PlayerController::update(float dt) {
     }
     owner->setLocation(prevLocation);
 
-    ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON);
-    if(shootButton.isActive()) {
-        spawnBulletFunc(owner);
+    timeSinceLastShot += dt;
+    if(timeSinceLastShot > 1.0f) {
+        ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON);
+        if (shootButton.isActive()) {
+            spawnBulletFunc(owner);
+            timeSinceLastShot = 0.0f;
+        }
     }
 
     auto targetLookAt = getPlaneIntersectionPoint();

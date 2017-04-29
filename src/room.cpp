@@ -9,6 +9,7 @@
 #include <components/EnemyComponent.h>
 #include <components/WinOnCollisionComponent.h>
 #include <ui/HealthBar.h>
+#include <components/TimedLife.h>
 
 #include "room.h"
 
@@ -40,11 +41,13 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                          "",
                                                                          "");
-        auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
+        auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
 
         auto bulletObject = std::make_shared<GameObject>(bulletMesh);
         bulletObject->setLocation(shooter->getAbsoluteLocation());
-        bulletObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
+        bulletObject->setRotation(shooter->getAbsoluteRotation());
+        bulletObject->setScale(chag::make_vector(2.0f,2.0f,2.0f));
+        bulletObject->addComponent(new TimedLife(10.0f));
         bulletObject->addComponent(new MoveComponent(
                 chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
                 direction * 10,
@@ -81,7 +84,6 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     playerObject->addCollidesWith(DOOR_IDENTIFIER);
     playerObject->addCollidesWith(ENEMY_SPAWNED_BULLET);
     m_scene->addShadowCaster(playerObject);
-
     //Enemy mesh
     auto monsterObject = std::make_shared<GameObject>(monsterMesh);
     HealthComponent *monsterHealth = new HealthComponent(2);

@@ -3,5 +3,6 @@ set(GAME_SOURCE_FILES
         components/PlayerController.cpp
         components/HealthComponent.cpp
         components/EnemyComponent.cpp
+        components/TimedLife.cpp
         ${GAME_SOURCE_FILES}
         PARENT_SCOPE)

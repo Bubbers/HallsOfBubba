@@ -20,6 +20,7 @@ public:
 private:
     std::function<void(GameObject*)> spawnBulletFunc;
     Camera *camera;
+    float timeSinceLastShot = 1.0f;
 
     chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
 };

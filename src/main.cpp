@@ -43,6 +43,7 @@ void createKeyListeners() {
 
 int main() {
 
+
     Logger::addLogHandler(new StdOutLogHandler());
     Logger::setLogLevel(LogLevel::INFO);
 
