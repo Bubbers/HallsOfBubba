@@ -3,6 +3,7 @@
 //
 
 #include "RoomGraph.h"
+#include "BossRoom.h"
 #include "HallwayRoom.h"
 
 RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback) {
@@ -52,6 +53,7 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
     auto treasureRoom = std::pair<int, int>(6, 4);
     auto bossRoom     = std::pair<int, int>(0, 1);
 
+    graph[bossRoom.first][bossRoom.second] = std::make_shared<BossRoom>();
     generatePath(startRoom, treasureRoom);
     generatePath(startRoom, bossRoom);
     generateDoors(walkCallback);
