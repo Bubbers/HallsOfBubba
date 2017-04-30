@@ -57,6 +57,9 @@ private:
 
     void loadPlayer(HealthComponent *pComponent);
 
+    void loadDirectionalLight();
+
+    void loadHud(const std::shared_ptr<TopDownCamera> &camera);
 };
 
 

@@ -82,25 +82,14 @@ std::shared_ptr<GameObject> HallwayRoom::getCrateObject(float3 centerPosition, f
     return obstacleObject;
 }
 
-void HallwayRoom::loadLights() {
-    std::shared_ptr<DirectionalLight> directionalLight = std::make_shared<DirectionalLight>();
-    directionalLight->diffuseColor= chag::make_vector(0.050f,0.050f,0.050f);
-    directionalLight->specularColor= chag::make_vector(0.050f,0.050f,0.050f);
-    directionalLight->ambientColor= chag::make_vector(0.000f,0.000f,0.000f);
 
-    directionalLight->direction= -chag::make_vector(0.0f,-10.0f,10.0f);
-    m_scene->directionalLight = directionalLight;
-}
 
 void HallwayRoom::loadGameObjects() {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
 
-    // HUD
-    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
-    hudObj->addRenderComponent(hudRenderer);
-    m_scene->addTransparentObject(hudObj);
+
 
 
     //Enemy mesh

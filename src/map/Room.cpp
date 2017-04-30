@@ -29,19 +29,25 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent *playerHe
 
     m_collider = std::shared_ptr<Collider>(ColliderFactory::getTwoPhaseCollider());
     m_scene = std::make_shared<Scene>();
-
-    hudRenderer = new HudRenderer();
-    hudRenderer->setWorldCamera(camera.get());
     this->camera = camera;
 
+    loadHud(camera);
     loadWalls();
     loadFloor();
     loadBulletFunctions(camera);
     loadDoors();
+    loadDirectionalLight();
     loadLights();
     loadPlayer(playerHealth);
     loadGameObjects();
+}
 
+void Room::loadHud(const std::shared_ptr<TopDownCamera> &camera) {
+    hudRenderer = new HudRenderer();
+    hudRenderer->setWorldCamera(camera.get());
+    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
+    hudObj->addRenderComponent(hudRenderer);
+    m_scene->addTransparentObject(hudObj);
 }
 
 void Room::loadWalls() {
@@ -308,4 +314,14 @@ void Room::createTorch(chag::float3 location)  {
     att.exp = 1;
     pointLight->attenuation = att;
     m_scene->pointLights.push_back(pointLight);
+}
+
+void Room::loadDirectionalLight() {
+    std::shared_ptr<DirectionalLight> directionalLight = std::make_shared<DirectionalLight>();
+    directionalLight->diffuseColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight->specularColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight->ambientColor= chag::make_vector(0.000f,0.000f,0.000f);
+
+    directionalLight->direction= -chag::make_vector(0.0f,-10.0f,10.0f);
+    m_scene->directionalLight = directionalLight;
 }

@@ -21,7 +21,6 @@ public:
     void loadGameObjects() override ;
 
 private:
-    void loadLights() override ;
 
     bool includeObstacle;
 
