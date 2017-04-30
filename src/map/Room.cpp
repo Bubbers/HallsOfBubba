@@ -114,7 +114,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
     m_scene->addShadowCaster(playerObject);
     //Enemy mesh
-    auto monsterObject = std::make_shared<GameObject>(monsterMesh, playerCollisionMesh);
+    /*auto monsterObject = std::make_shared<GameObject>(monsterMesh, playerCollisionMesh);
     HealthComponent *monsterHealth = new HealthComponent(2);
     monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
     allAlive.push_back(monsterHealth);
@@ -145,7 +145,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     monsterObject2->setIdentifier(ENEMY_IDENTIFIER);
     monsterObject2->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
 
-    m_scene->addShadowCaster(monsterObject2);
+    m_scene->addShadowCaster(monsterObject2);*/
 
     // Ground mesh
     auto floorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/floor.obj");
@@ -235,10 +235,10 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     hudObj->addRenderComponent(hudRenderer);
     HealthBar* playerHealthBar = new HealthBar(playerHealth);
     hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
-    HealthBar* monsterHealthBar = new HealthBar(monsterHealth);
+/*    HealthBar* monsterHealthBar = new HealthBar(monsterHealth);
     hudRenderer->addRelativeLayout(monsterObject, monsterHealthBar);
     HealthBar* monsterHealthBar2 = new HealthBar(monsterHealth2);
-    hudRenderer->addRelativeLayout(monsterObject2, monsterHealthBar2);
+    hudRenderer->addRelativeLayout(monsterObject2, monsterHealthBar2);*/
 
     m_scene->addTransparentObject(hudObj);
 
