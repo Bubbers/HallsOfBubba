@@ -61,82 +61,67 @@ std::shared_ptr<GameObject> HallwayRoom::getEnemyObject(std::function<void(GameO
 }
 
 void HallwayRoom::addCrates(chag::float3 centerPosition) const {
-    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(1.0f, 0.0f, 1.0f)));
-    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(-1.0f, 0.0f, 1.0f)));
-    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(0.0f, 0.0f, -1.0f)));
+    auto gobParent = getCrateObject();
 
-    const std::shared_ptr<GameObject> &object = getCrateObject(centerPosition, chag::make_vector(0.0f, 2.0f, 0.0f));
-    object->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), degreeToRad(135)));
-    m_scene->addShadowCaster(object);
+    auto gob1 = getCrateObject();
+    gob1->setLocation(chag::make_vector(1.0f, -2.0f, 1.0f));
+    auto gob2 = getCrateObject();
+    gob2->setLocation(chag::make_vector(-1.0f, -2.0f, 1.0f));
+    auto gob3 = getCrateObject();
+    gob3->setLocation(chag::make_vector(0.0f, -2.0f, -1.0f));
+
+    gobParent->addChild(gob1);
+    gobParent->addChild(gob2);
+    gobParent->addChild(gob3);
+    gobParent->setLocation(centerPosition + chag::make_vector(0.0f, 2.0f, 0.0f));
+    gobParent->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), degreeToRad(rand() % 360)));
+    m_scene->addShadowCaster(gobParent);
 }
 
-std::shared_ptr<GameObject> HallwayRoom::getCrateObject(float3 centerPosition, float3 offset) const {
+std::shared_ptr<GameObject> HallwayRoom::getCrateObject() const {
     std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
-    std::shared_ptr<Mesh> obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");;
+    std::shared_ptr<Mesh> obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
     std::shared_ptr<GameObject> obstacleObject = std::make_shared<GameObject>(obstacleMesh);
-    obstacleObject->setLocation(centerPosition + offset);
-    //obstacleObject->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
+
     StandardRenderer* stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
     obstacleObject->addRenderComponent(stdObstacleRenderer);
     obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
     return obstacleObject;
 }
 
-
-
 void HallwayRoom::loadGameObjects() {
+    randomlyGenerateObjectAtPos(chag::make_vector(8.0f, 0.0f, 8.0f));
+    randomlyGenerateObjectAtPos(chag::make_vector(-8.0f, 0.0f, 8.0f));
+    randomlyGenerateObjectAtPos(chag::make_vector(-8.0f, 0.0f, -8.0f));
+    randomlyGenerateObjectAtPos(chag::make_vector(8.0f, 0.0f, -8.0f));
+
+    createTorch(chag::make_vector(0.0f, 0.0f, 0.0f));
+}
+
+void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
+    int randomNum = rand() % 4;
 
-
-
-
-    //Enemy mesh
-    std::shared_ptr<GameObject> monsterObject = getEnemyObject(spawnBullet,
-                                                               playerObject,
-                                                               hudRenderer,
-                                                               make_vector(-8.0f, 0.0f, 8.0f));
-    m_scene->addShadowCaster(monsterObject);
-
-    std::shared_ptr<GameObject> monsterObject2 = getEnemyObject(spawnBullet,
-                                                                playerObject,
-                                                                hudRenderer,
-                                                                make_vector(8.0f, 0.0f, 8.0f));
-    m_scene->addShadowCaster(monsterObject2);
-
-
-
-    // Windmil mesh
-    auto windMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/wind.fbx");
-
-    auto windObject = std::make_shared<GameObject>(windMesh);
-    windObject->setLocation(chag::make_vector(11.0f, 0.0f, 10.0f));
-    windObject->setScale(chag::make_vector(0.005f, 0.005f, 0.005f));
-    windObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(235)));
-    StandardRenderer* stdWindRenderer = new StandardRenderer(windMesh, standardShader);
-    windObject->addRenderComponent(stdWindRenderer);
-    windObject->setIdentifier(OBSTACLE_IDENTIFIER);
-    m_scene->addShadowCaster(windObject);
-
-    // Obstacle mesh
-    if (includeObstacle) {
+    if(randomNum == 0) {
         auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
 
-        auto obstacleObject = std::make_shared<GameObject>(obstacleMesh);
-        obstacleObject->setLocation(chag::make_vector(-5.0f, 0.0f, 5.0f));
-        obstacleObject->setRotation(
-                chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
-        StandardRenderer *stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
-        obstacleObject->addRenderComponent(stdObstacleRenderer);
-        obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
+        auto obstacleObject = getCrateObject();
+        obstacleObject->setLocation(location);
+        obstacleObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(rand() % 360) ));
         m_scene->addShadowCaster(obstacleObject);
-    }
-    addCrates(chag::make_vector(-9.0f, 0.0f, 0.0f));
-    addCrates(chag::make_vector(8.0f, 0.0f, -6.0f));
+    } else if(randomNum == 1) {
+        std::shared_ptr<GameObject> monsterObject2 = getEnemyObject(spawnBullet,
+                                                                    playerObject,
+                                                                    hudRenderer,
+                                                                    location);
+        m_scene->addShadowCaster(monsterObject2);
+    } else if(randomNum == 2) {
+        addCrates(location);
+    } else if(randomNum == 3) {
 
-    createTorch(make_vector(-5.0f, 0.0f, 9.0f));
-    createTorch(make_vector(5.0f, 0.0f, 9.0f));
+    }
 }
 
 

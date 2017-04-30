@@ -25,10 +25,12 @@ private:
     bool includeObstacle;
 
     void addCrates(chag::float3 centerPosition) const;
-    std::shared_ptr<GameObject> getCrateObject(chag::float3 centerPosition, chag::float3 offset) const;
+    std::shared_ptr<GameObject> getCrateObject() const;
 
     std::shared_ptr<GameObject> getEnemyObject(std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet,
                                                std::shared_ptr<GameObject> playerObject,
                                                HudRenderer *hudRenderer,
                                                chag::float3 location);
+
+    void randomlyGenerateObjectAtPos(chag::float3 location);
 };
