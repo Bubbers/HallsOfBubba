@@ -198,17 +198,21 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
 
         auto doorObject = std::make_shared<GameObject>(doorMesh);
         chag::float3 location;
+        chag::Quaternion rotation;
         switch(door.first) {
             case UP:
                 location = chag::make_vector(  0.0f, 0.0f,  12.5f); break;
             case DOWN:
                 location = chag::make_vector(  0.0f, 0.0f, -12.5f); break;
             case RIGHT:
+                rotation = chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(90));
                 location = chag::make_vector(-12.5f, 0.0f,   0.0f); break;
             case LEFT:
+                rotation = chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(90));
                 location = chag::make_vector( 12.5f, 0.0f,   0.0f); break;
         }
         doorObject->setLocation(location);
+        doorObject->setRotation(rotation);
         StandardRenderer *stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
         doorObject->addRenderComponent(stdDoorRenderer);
         doorObject->addComponent(new WinOnCollisionComponent(m_scene, [door]() -> void { door.second(door.first); }));
@@ -216,9 +220,6 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
 
         m_scene->addShadowCaster(doorObject);
     }
-
-
-
 
     createLight();
 
