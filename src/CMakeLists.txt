@@ -1,12 +1,13 @@
 
 # Files to compile
-set(GAME_SOURCE_FILES main.cpp controls.h ObjectIdentifiers.h room.cpp)
+set(GAME_SOURCE_FILES main.cpp controls.h ObjectIdentifiers.h)
 
 # Subdirectories
 add_subdirectory(cameras)
 add_subdirectory(components)
 add_subdirectory(ui)
 add_subdirectory(particles)
+add_subdirectory(map)
 
 # Define the executable
 set(EXECUTABLE_NAME HallsOfBubba)

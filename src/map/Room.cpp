@@ -16,17 +16,24 @@
 #include <particles/BackgroundParticle.h>
 #include <particles/TorchParticle.h>
 #include <particles/SecondAttackParticle.h>
-#include "room.h"
+#include "Room.h"
 
-Room::Room()
-{
+
+Room::Room(bool includeObstacle) : includeObstacle(includeObstacle){
+
 }
+
 
 Room::~Room()
 {
 }
 
-void Room::load(std::shared_ptr<TopDownCamera> camera) {
+void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHealth, Direction enteredDirection) {
+
+    if(isLoaded){
+        return;
+    }
+
     m_collider = std::shared_ptr<Collider>(ColliderFactory::getTwoPhaseCollider());
 
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
@@ -50,9 +57,9 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
 
         auto bulletObject = std::make_shared<GameObject>(bulletMesh);
-        bulletObject->setLocation(shooter->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f));
+        bulletObject->setLocation(shooter->getAbsoluteLocation());
         bulletObject->setRotation(shooter->getAbsoluteRotation());
-        bulletObject->setScale(chag::make_vector(3.0f,3.0f,3.0f));
+        bulletObject->setScale(chag::make_vector(3.0f, 3.0f, 3.0f));
         bulletObject->addComponent(new TimedLife(20.0f));
         bulletObject->addComponent(new MoveComponent(
                 chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
@@ -85,7 +92,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
         bulletObject->addComponent(new DirtyBulletOnCollision());
 
         bulletObject->update(0);
-        StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
+        StandardRenderer *stdRenderer = new StandardRenderer(bulletMesh, standardShader);
         bulletObject->addRenderComponent(stdRenderer);
         bulletObject->setDynamic(true);
 
@@ -97,11 +104,10 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
     auto playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
     playerObject->addComponent(new PlayerController(spawnBullet, camera.get()));
-    HealthComponent *playerHealth = new HealthComponent(2);
     allAlive.push_back(playerHealth);
     playerObject->addComponent(playerHealth);
     playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
-    StandardRenderer* stdrenderer = new StandardRenderer(playerMesh, standardShader);
+    StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
     playerObject->addRenderComponent(stdrenderer);
     playerObject->setDynamic(true);
     playerObject->setIdentifier(PLAYER_IDENTIFIER);
@@ -114,7 +120,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     allAlive.push_back(monsterHealth);
     monsterObject->addComponent(monsterHealth);
     monsterObject->setLocation(chag::make_vector(-8.0f, 0.0f, 8.0f));
-    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f), -6*M_PI/5));
+    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
     monsterObject->initializeModelMatrix();
     StandardRenderer *stdMonsterRenderer = new StandardRenderer(monsterMesh, standardShader);
     monsterObject->addRenderComponent(stdMonsterRenderer);
@@ -131,7 +137,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     allAlive.push_back(monsterHealth2);
     monsterObject2->addComponent(monsterHealth2);
     monsterObject2->setLocation(chag::make_vector(8.0f, 0.0f, 8.0f));
-    monsterObject2->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f), -6*M_PI/5));
+    monsterObject2->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
     monsterObject2->initializeModelMatrix();
     StandardRenderer *stdMonsterRenderer2 = new StandardRenderer(monsterMesh, standardShader);
     monsterObject2->addRenderComponent(stdMonsterRenderer2);
@@ -146,23 +152,10 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
     auto floorObject = std::make_shared<GameObject>(floorMesh);
     floorObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
-    StandardRenderer* stdFloorRenderer = new StandardRenderer(floorMesh, standardShader);
+    StandardRenderer *stdFloorRenderer = new StandardRenderer(floorMesh, standardShader);
     floorObject->addRenderComponent(stdFloorRenderer);
 
     m_scene->addShadowCaster(floorObject);
-
-    // Door mesh
-    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door.obj");
-
-    auto doorObject = std::make_shared<GameObject>(doorMesh);
-    doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
-    StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
-    doorObject->setScale(chag::make_vector(0.5f, 0.5f, 0.5f));
-    doorObject->addRenderComponent(stdDoorRenderer);
-    doorObject->addComponent(new WinOnCollisionComponent(m_scene));
-    doorObject->setIdentifier(DOOR_IDENTIFIER);
-
-    m_scene->addShadowCaster(doorObject);
 
     // Windmil mesh
     auto windMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/wind.fbx");
@@ -178,15 +171,18 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
 
     // Obstacle mesh
-    auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
+    if (includeObstacle) {
+        auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
 
-    auto obstacleObject = std::make_shared<GameObject>(obstacleMesh);
-    obstacleObject->setLocation(chag::make_vector(-5.0f, 0.0f, 5.0f));
-    obstacleObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
-    StandardRenderer* stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
-    obstacleObject->addRenderComponent(stdObstacleRenderer);
-    obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
-    m_scene->addShadowCaster(obstacleObject);
+        auto obstacleObject = std::make_shared<GameObject>(obstacleMesh);
+        obstacleObject->setLocation(chag::make_vector(-5.0f, 0.0f, 5.0f));
+        obstacleObject->setRotation(
+                chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
+        StandardRenderer *stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
+        obstacleObject->addRenderComponent(stdObstacleRenderer);
+        obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
+        m_scene->addShadowCaster(obstacleObject);
+    }
 
     auto torchMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/torch.obj");
 
@@ -205,6 +201,32 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     torchObject2->addRenderComponent(stdTorchRenderer2);
     torchObject2->setIdentifier(OBSTACLE_IDENTIFIER);
     m_scene->addShadowCaster(torchObject2);
+
+    // Door mesh
+    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door.obj");
+
+    for(auto door : doors){
+
+        auto doorObject = std::make_shared<GameObject>(doorMesh);
+        chag::float3 location;
+        switch(door.first) {
+            case UP:
+                location = chag::make_vector(  0.0f, 0.0f,  12.5f); break;
+            case DOWN:
+                location = chag::make_vector(  0.0f, 0.0f, -12.5f); break;
+            case RIGHT:
+                location = chag::make_vector(-12.5f, 0.0f,   0.0f); break;
+            case LEFT:
+                location = chag::make_vector( 12.5f, 0.0f,   0.0f); break;
+        }
+        doorObject->setLocation(location);
+        StandardRenderer *stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
+        doorObject->addRenderComponent(stdDoorRenderer);
+        doorObject->addComponent(new WinOnCollisionComponent(m_scene, [door]() -> void { door.second(door.first); }));
+        doorObject->setIdentifier(DOOR_IDENTIFIER);
+
+        m_scene->addShadowCaster(doorObject);
+    }
 
     // HUD
     std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
@@ -337,4 +359,10 @@ void Room::createLight() {
     pointLight2.position = chag::make_vector(11.0f, 2.0f, -11.0f);
     pointLight2.attenuation = att;
     m_scene->pointLights.push_back(pointLight2);
+}
+
+void Room::addDoor(Direction direction, std::function<void(Direction direction)> callback) {
+
+    doors.push_back(std::pair<Direction, std::function<void(Direction)>>(direction, callback));
+
 }

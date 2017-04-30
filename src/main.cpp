@@ -7,13 +7,17 @@
 #include <KeyboardButton.h>
 #include <MouseButton.h>
 #include <Renderer.h>
+#include <map/RoomGraph.h>
+#include <components/HealthComponent.h>
 #include "cameras/TopDownCamera.h"
-#include "room.h"
+#include "map/Room.h"
 #include "controls.h"
 #include "ObjectIdentifiers.h"
 
 Renderer renderer;
 std::shared_ptr<Room> room;
+std::shared_ptr<RoomGraph> roomGraph;
+HealthComponent* playerHealth;
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -42,6 +46,12 @@ void createKeyListeners() {
     cm->addBinding(SHOOT_BUTTON_RMB, new MouseButton(sf::Mouse::Right));
 }
 
+void walk(Direction direction){
+    roomGraph->walk(direction);
+    room = roomGraph->getCurrentRoom();
+    room->load(camera, playerHealth, direction);
+}
+
 int main() {
     srand(time(NULL));
 
@@ -62,8 +72,10 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    room = std::make_shared<Room>();
-    room->load(camera);
+    playerHealth = new HealthComponent(2);
+    roomGraph = std::make_shared<RoomGraph>(walk);
+    room = roomGraph->getCurrentRoom();
+    room->load(camera, playerHealth, Direction::UP);
 
     createKeyListeners();
 

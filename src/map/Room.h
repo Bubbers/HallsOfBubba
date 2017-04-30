@@ -6,22 +6,25 @@
 #include <Renderer.h>
 #include <AudioManager.h>
 #include <cameras/TopDownCamera.h>
+#include <map/Direction.h>
+#include <components/HealthComponent.h>
 
 class HudRenderer;
-class HealthComponent;
 
 class Room {
 
 public:
-    Room();
+    Room(bool includeObstacle);
     ~Room();
 
-    void load(std::shared_ptr<TopDownCamera> camera);
+    void load(std::shared_ptr<TopDownCamera> camera, HealthComponent* player, Direction enteredDirection);
+    void addDoor(Direction direction, std::function<void(Direction)> callback);
     void update(float dt);
     void display(Renderer &renderer,
                  std::shared_ptr<Camera> camera,
                  float timeSinceStart,
                  float timeSinceLastCall);
+
 
 private:
     void createLight();
@@ -34,4 +37,9 @@ private:
     std::vector<HealthComponent*> allAlive;
 
     std::shared_ptr<sf::Sound> m_shootSound;
+
+    std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
+
+    bool includeObstacle;
+    bool isLoaded = false;
 };
