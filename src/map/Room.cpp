@@ -40,7 +40,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent *playerHe
     loadDoors();
     loadDirectionalLight();
     loadLights();
-    loadPlayer(playerHealth);
+    loadPlayer(playerHealth, enteredDirection);
     loadGameObjects();
 }
 
@@ -248,7 +248,7 @@ void Room::display(Renderer &renderer, std::shared_ptr<Camera> camera, float tim
     renderer.drawScene(camera.get(), m_scene.get(), timeSinceStart);
 }
 
-void Room::loadPlayer(HealthComponent *playerHealth) {
+void Room::loadPlayer(HealthComponent *playerHealth, Direction enteredDirection) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
@@ -271,7 +271,15 @@ void Room::loadPlayer(HealthComponent *playerHealth) {
 
     allAlive.push_back(playerHealth);
     playerObject->addComponent(playerHealth);
-    playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
+    if(enteredDirection == Direction::UP) {
+        playerObject->setLocation(chag::make_vector(0.0f, 0.0f, -8.0f));
+    } else if(enteredDirection == Direction::DOWN) {
+        playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 8.0f));
+    } else if(enteredDirection == Direction::LEFT) {
+        playerObject->setLocation(chag::make_vector(-8.0f, 0.0f, 0.0f));
+    } else if(enteredDirection == Direction::RIGHT) {
+        playerObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
+    }
     StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
     playerObject->addRenderComponent(stdrenderer);
     playerObject->setDynamic(true);

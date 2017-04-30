@@ -55,7 +55,7 @@ private:
     void loadDoors();
     void loadFloor();
 
-    void loadPlayer(HealthComponent *pComponent);
+    void loadPlayer(HealthComponent *pComponent, Direction enteredDirection);
 
     void loadDirectionalLight();
 
