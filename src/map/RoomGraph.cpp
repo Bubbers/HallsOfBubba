@@ -53,6 +53,9 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
 
     generatePath(startRoom, treasureRoom, walkCallback);
     generatePath(startRoom, bossRoom, walkCallback);
+
+    currentX = startRoom.first;
+    currentY = startRoom.second;
 }
 
 void RoomGraph::generatePath(std::pair<int, int> startRoom,
