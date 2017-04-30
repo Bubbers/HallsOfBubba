@@ -64,7 +64,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
         m_shootSound->play();
     };
 
-    auto spawnBlastBullet = [&](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
+    auto spawnBlastBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
         auto bulletObject = generateBulletBase(shooter);
 
         std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
