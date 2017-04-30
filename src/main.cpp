@@ -38,7 +38,8 @@ void createKeyListeners() {
     ControlsManager* cm = ControlsManager::getInstance();
     cm->addBinding(MOVE_HORIZONTAL, new KeyboardButton(sf::Keyboard::A, sf::Keyboard::D));
     cm->addBinding(MOVE_VERTICAL, new KeyboardButton(sf::Keyboard::W, sf::Keyboard::S));
-    cm->addBinding(SHOOT_BUTTON, new MouseButton(sf::Mouse::Left));
+    cm->addBinding(SHOOT_BUTTON_LMB, new MouseButton(sf::Mouse::Left));
+    cm->addBinding(SHOOT_BUTTON_RMB, new MouseButton(sf::Mouse::Right));
 }
 
 int main() {

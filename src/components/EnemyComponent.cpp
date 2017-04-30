@@ -1,7 +1,9 @@
 
+#include <Texture.h>
+#include <ResourceManager.h>
 #include "EnemyComponent.h"
 
-EnemyComponent::EnemyComponent(std::function<void(GameObject*)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
+EnemyComponent::EnemyComponent(std::function<void(GameObject*, std::shared_ptr<Texture>)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
         bulletSpawner(bulletSpawner), playerObject(playerObject){
 
 }
@@ -9,7 +11,7 @@ EnemyComponent::EnemyComponent(std::function<void(GameObject*)> bulletSpawner, s
 void EnemyComponent::update(float dt) {
     float randNum = float(rand()) / RAND_MAX;
     if(randNum < 1.0f/120.0f){ // one bullet every other second (on average)
-        bulletSpawner(owner);
+        bulletSpawner(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png"));
     }
 
     orientEnemyTowardsPlayer();

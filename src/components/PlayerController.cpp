@@ -7,11 +7,12 @@
 #include <MousePosition.h>
 #include <linmath/SmallVector2.h>
 #include <Globals.h>
+#include <ResourceManager.h>
 #include "PlayerController.h"
 #include "Camera.h"
 
 
-PlayerController::PlayerController(std::function<void(GameObject*)> spawnBulletFunc, Camera *camera) :
+PlayerController::PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, Camera *camera) :
         spawnBulletFunc(spawnBulletFunc), camera(camera){
 
 }
@@ -74,12 +75,24 @@ void PlayerController::update(float dt) {
     }
     owner->setLocation(prevLocation);
 
-    timeSinceLastShot += dt;
-    if(timeSinceLastShot > 1.0f) {
-        ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON);
+    timeSinceLastShotAttackLMB += dt;
+    if(timeSinceLastShotAttackLMB > 1.0f) {
+        ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_LMB);
         if (shootButton.isActive()) {
-            spawnBulletFunc(owner);
-            timeSinceLastShot = 0.0f;
+            spawnBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png"));
+            timeSinceLastShotAttackLMB = 0.0f;
+        }
+    }
+
+    timeSinceLastShotAttackRMB += dt;
+    if(timeSinceLastShotAttackRMB > 5.0f) {
+        ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_RMB);
+        if (shootButton.isActive()) {
+            for (int i = 0; i < 8; ++i) {
+                owner->setRotation(owner->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
+                spawnBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
+            }
+            timeSinceLastShotAttackRMB = 0.0f;
         }
     }
 
@@ -88,7 +101,7 @@ void PlayerController::update(float dt) {
     chag::float3 vectorBetweenMouseAndPlayer = chag::normalize(targetLookAt - owner->getAbsoluteLocation());
 
     chag::float3 defaultDir = chag::make_vector(0.0f, 0.0f, 1.0f);
-    float angle = acos(chag::dot(defaultDir, vectorBetweenMouseAndPlayer));
+    float angle = (float)acos(chag::dot(defaultDir, vectorBetweenMouseAndPlayer));
     if(vectorBetweenMouseAndPlayer.x < 0) {
         angle = -angle ;
     }

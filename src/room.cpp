@@ -15,6 +15,7 @@
 #include <ParticleRenderer.h>
 #include <particles/BackgroundParticle.h>
 #include <particles/TorchParticle.h>
+#include <particles/SecondAttackParticle.h>
 #include "room.h"
 
 Room::Room()
@@ -38,7 +39,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
     m_scene = std::make_shared<Scene>();
-    auto spawnBullet = [&](GameObject *shooter) mutable {
+    auto spawnBullet = [&](GameObject *shooter, std::shared_ptr<Texture> particleTexture) mutable {
         chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
         chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
         chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
@@ -59,6 +60,17 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
                 chag::make_vector(0.0f, 0.0f, 0.0f),
                 chag::make_vector(0.0f, 0.0f, 0.0f)
         ));
+
+
+        std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+        std::shared_ptr<SecondAttackParticle> backgroundParticleConf = std::make_shared<SecondAttackParticle>();
+
+        ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
+        GameObject *particleGenerator = new GameObject(bulletObject.get());
+        particleGenerator->addRenderComponent(gen);
+        particleGenerator->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+        bulletObject->addChild(particleGenerator);
+        particleGenerator->initializeModelMatrix();
 
         int shootId = 0;
         if (shooter->getIdentifier() == PLAYER_IDENTIFIER) {
@@ -140,7 +152,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     m_scene->addShadowCaster(floorObject);
 
     // Door mesh
-    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door2.obj");
+    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door.obj");
 
     auto doorObject = std::make_shared<GameObject>(doorMesh);
     doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
