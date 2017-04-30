@@ -29,11 +29,14 @@ Room::~Room()
 {
 }
 
-void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHealth, Direction enteredDirection) {
-
-    if(isLoaded){
+void Room::load(std::shared_ptr<TopDownCamera> camera,
+                HealthComponent* playerHealth,
+                Direction enteredDirection)
+{
+    if (isLoaded) {
         return;
     }
+    isLoaded = true;
 
     m_collider = std::shared_ptr<Collider>(ColliderFactory::getTwoPhaseCollider());
 
