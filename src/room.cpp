@@ -129,7 +129,6 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
 
     m_scene->addShadowCaster(monsterObject2);
 
-
     // Ground mesh
     auto floorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/floor.obj");
 
@@ -141,22 +140,37 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     m_scene->addShadowCaster(floorObject);
 
     // Door mesh
-    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door.obj");
+    auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/door2.obj");
 
     auto doorObject = std::make_shared<GameObject>(doorMesh);
     doorObject->setLocation(chag::make_vector(0.0f, 0.0f, 12.5f));
     StandardRenderer* stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
+    doorObject->setScale(chag::make_vector(0.5f, 0.5f, 0.5f));
     doorObject->addRenderComponent(stdDoorRenderer);
     doorObject->addComponent(new WinOnCollisionComponent(m_scene));
     doorObject->setIdentifier(DOOR_IDENTIFIER);
 
     m_scene->addShadowCaster(doorObject);
 
+    // Windmil mesh
+    auto windMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/wind.fbx");
+
+    auto windObject = std::make_shared<GameObject>(windMesh);
+    windObject->setLocation(chag::make_vector(11.0f, 0.0f, 10.0f));
+    windObject->setScale(chag::make_vector(0.005f, 0.005f, 0.005f));
+    windObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(235)));
+    StandardRenderer* stdWindRenderer = new StandardRenderer(windMesh, standardShader);
+    windObject->addRenderComponent(stdWindRenderer);
+    windObject->setIdentifier(OBSTACLE_IDENTIFIER);
+    m_scene->addShadowCaster(windObject);
+
+
     // Obstacle mesh
     auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
 
     auto obstacleObject = std::make_shared<GameObject>(obstacleMesh);
     obstacleObject->setLocation(chag::make_vector(-5.0f, 0.0f, 5.0f));
+    obstacleObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
     StandardRenderer* stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
     obstacleObject->addRenderComponent(stdObstacleRenderer);
     obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
@@ -171,6 +185,14 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     torchObject->addRenderComponent(stdTorchRenderer);
     torchObject->setIdentifier(OBSTACLE_IDENTIFIER);
     m_scene->addShadowCaster(torchObject);
+
+    auto torchObject2 = std::make_shared<GameObject>(torchMesh);
+    torchObject2->setLocation(chag::make_vector(11.0f, 0.0f, -11.0f));
+    torchObject2->setScale(chag::make_vector(5.0f, 5.0f, 5.0f));
+    StandardRenderer *stdTorchRenderer2 = new StandardRenderer(torchMesh, standardShader);
+    torchObject2->addRenderComponent(stdTorchRenderer2);
+    torchObject2->setIdentifier(OBSTACLE_IDENTIFIER);
+    m_scene->addShadowCaster(torchObject2);
 
     // HUD
     std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
@@ -199,6 +221,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     particleGenerator->addRenderComponent(gen);
     particleGenerator->setLocation(make_vector(4.0f, -20.0f, 12.5f));
     floorObject->addChild(particleGenerator);
+    particleGenerator->initializeModelMatrix();
 
     // torch particles
     std::shared_ptr<ParticleRenderer> torchParticleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
@@ -210,6 +233,15 @@ void Room::load(std::shared_ptr<TopDownCamera> camera) {
     particleGeneratorObject->setLocation(make_vector(0.0f, 0.0f, 0.0f));
     particleGeneratorObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
     torchObject->addChild(particleGeneratorObject);
+    particleGeneratorObject->initializeModelMatrix();
+
+    ParticleGenerator *torchParticleGenerator2 = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
+    GameObject *particleGeneratorObject2 = new GameObject(torchObject2.get());
+    particleGeneratorObject2->addRenderComponent(torchParticleGenerator2);
+    particleGeneratorObject2->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+    particleGeneratorObject2->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
+    torchObject2->addChild(particleGeneratorObject2);
+    particleGeneratorObject2->initializeModelMatrix();
 
 }
 
@@ -268,7 +300,7 @@ void Room::display(Renderer &renderer,
 void Room::createLight() {
 
     DirectionalLight directionalLight = DirectionalLight();
-    directionalLight.diffuseColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight.diffuseColor= chag::make_vector(0.550f,0.550f,0.550f);
     directionalLight.specularColor= chag::make_vector(0.050f,0.050f,0.050f);
     directionalLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
 
@@ -276,9 +308,21 @@ void Room::createLight() {
     m_scene->directionalLight = directionalLight;
 
     PointLight pointLight;
-    pointLight.diffuseColor= chag::make_vector(0.50f,0.50f,0.50f);
+    pointLight.diffuseColor= chag::make_vector(5.50f,0.50f,0.50f);
     pointLight.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
     pointLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
     pointLight.position = chag::make_vector(-11.0f, 2.0f, -11.0f);
+    Attenuation att;
+
+    att.linear = 2;
+    pointLight.attenuation = att;
     m_scene->pointLights.push_back(pointLight);
+
+    PointLight pointLight2;
+    pointLight2.diffuseColor= chag::make_vector(5.50f,0.50f,0.50f);
+    pointLight2.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
+    pointLight2.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    pointLight2.position = chag::make_vector(11.0f, 2.0f, -11.0f);
+    pointLight2.attenuation = att;
+    m_scene->pointLights.push_back(pointLight2);
 }
