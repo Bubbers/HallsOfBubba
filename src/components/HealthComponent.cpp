@@ -23,7 +23,6 @@ void HealthComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
         m_hurtSound->play();
     }
     if(health <= 0){
-        printf("YOU DEAD!\n");
         m_deathSound->play();
         owner->makeDirty();
     }

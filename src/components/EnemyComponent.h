@@ -15,11 +15,11 @@ public:
     EnemyComponent(std::function<void(GameObject*, std::shared_ptr<Texture>)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
     virtual void update(float dt);
 
-    void beforeCollision(std::shared_ptr<GameObject> collider) override;
+    virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
 
-    void duringCollision(std::shared_ptr<GameObject> collider) override;
+    virtual void duringCollision(std::shared_ptr<GameObject> collider) override;
 
-private:
+protected:
     std::function<void(GameObject*, std::shared_ptr<Texture>)> bulletSpawner;
     std::shared_ptr<GameObject> playerObject;
     chag::float3 locationAtLastUpdate;

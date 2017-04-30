@@ -17,6 +17,8 @@
 #include <components/PlayerController.h>
 #include <ui/HealthBar.h>
 #include <particles/TorchParticle.h>
+#include <particles/SecondAttackParticle.h>
+#include <components/BossController.h>
 #include "Room.h"
 #include "HallwayRoom.h"
 
@@ -88,11 +90,12 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
         std::shared_ptr<FirstAttackParticle> backgroundParticleConf = std::make_shared<FirstAttackParticle>();
 
         ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
-        GameObject *particleGenerator = new GameObject(bulletObject.get());
+        auto particleGenerator = std::make_shared<GameObject>(bulletObject);
         particleGenerator->addRenderComponent(gen);
         particleGenerator->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
         bulletObject->addChild(particleGenerator);
         particleGenerator->initializeModelMatrix();
+
 
         m_scene->addShadowCaster(bulletObject);
         m_shootSound->play();
@@ -105,7 +108,7 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
         std::shared_ptr<SecondAttackParticle> backgroundParticleConf = std::make_shared<SecondAttackParticle>();
 
         ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
-        GameObject *particleGenerator = new GameObject(bulletObject.get());
+        auto particleGenerator = std::make_shared<GameObject>(bulletObject);
         particleGenerator->addRenderComponent(gen);
         particleGenerator->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
         bulletObject->addChild(particleGenerator);
@@ -180,7 +183,7 @@ void Room::loadFloor() {
     std::shared_ptr<BackgroundParticle> backgroundParticleConf = std::make_shared<BackgroundParticle>();
 
     ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
-    GameObject *particleGenerator = new GameObject(floorObject.get());
+    auto particleGenerator = std::make_shared<GameObject>(floorObject);
     particleGenerator->addRenderComponent(gen);
     particleGenerator->setLocation(make_vector(4.0f, -20.0f, 12.5f));
     floorObject->addChild(particleGenerator);
@@ -219,6 +222,7 @@ void Room::loadDoors() {
 
         m_scene->addShadowCaster(doorObject);
     }
+
 }
 
 void Room::addDoor(Direction direction, std::function<void(Direction direction)> callback) {
@@ -296,7 +300,7 @@ void Room::createTorch(chag::float3 location)  {
     std::shared_ptr<ParticleRenderer> torchParticleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
     std::shared_ptr<TorchParticle> torchParticleConf = std::make_shared<TorchParticle>();
     ParticleGenerator *torchParticleGenerator = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
-    GameObject *particleGeneratorObject = new GameObject(torchObject.get());
+    auto particleGeneratorObject = std::make_shared<GameObject>(torchObject);
     particleGeneratorObject->addRenderComponent(torchParticleGenerator);
     particleGeneratorObject->setLocation(make_vector(-0.06f, 0.0f, 0.0f));
     particleGeneratorObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
