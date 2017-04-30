@@ -20,7 +20,6 @@ void EnemyComponent::update(float dt) {
     if(rand() % 60 == 0) {
 
         bool randa = (rand() % 10) < 5;
-        printf("a:%d ",randa);
         if(randa) {
             previousXSpeed = -60;
         } else {
@@ -28,7 +27,6 @@ void EnemyComponent::update(float dt) {
         }
 
         randa = (rand() % 10) < 5;
-        printf("b:%d \n",randa);
         if(randa) {
             previousYSpeed = -60;
         } else {
