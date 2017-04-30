@@ -317,10 +317,10 @@ void Room::createWalls() {
     auto upVect = chag::make_vector(0.0f, 1.0f, 0.0f);
 
     chag::SmallVector3<float> wallPos[] = {
-        chag::make_vector(-12.5f,  0.0f,  12.5f),
-        chag::make_vector(-12.5f,  0.0f,  12.5f),
-        chag::make_vector( 12.5f,  0.0f, -12.5f),
-        chag::make_vector( 12.5f,  0.0f, -12.5f)
+        chag::make_vector(-13.0f,  0.0f,  13.0f),
+        chag::make_vector(-13.0f,  0.0f,  13.0f),
+        chag::make_vector( 13.0f,  0.0f, -13.0f),
+        chag::make_vector( 13.0f,  0.0f, -13.0f)
     };
 
     for (int rotMult = 0; rotMult < 4; ++rotMult) {
