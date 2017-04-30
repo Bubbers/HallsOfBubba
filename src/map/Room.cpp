@@ -46,7 +46,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
     m_scene = std::make_shared<Scene>();
-    auto spawnBullet = [&](GameObject *shooter, std::shared_ptr<Texture> particleTexture) mutable {
+    auto spawnBullet = [this, camera](GameObject *shooter, std::shared_ptr<Texture> particleTexture) mutable {
         chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
         chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
         chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
