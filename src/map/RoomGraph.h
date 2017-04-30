@@ -32,6 +32,11 @@ private:
     bool hasWalked = false;
     Direction directionWalked;
 
+
+    void generateGraph(std::function<void(Direction)> walkCallback);
+    void generatePath(std::pair<int, int> startRoom,
+                      std::pair<int, int> targetRoom,
+                      std::function<void(Direction)> walkCallback);
 };
 
 

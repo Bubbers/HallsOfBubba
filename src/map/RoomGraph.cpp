@@ -5,9 +5,7 @@
 #include "RoomGraph.h"
 
 RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback) {
-    graph[currentX][currentY] = std::make_shared<Room>(true);
-    graph[currentX][currentY+1] = std::make_shared<Room>(false);
-    graph[currentX][currentY]->addDoor(Direction::UP, walkCallback);
+    generateGraph(walkCallback);
 }
 
 std::shared_ptr<Room> RoomGraph::getCurrentRoom(){
@@ -45,4 +43,58 @@ std::pair<int, int> RoomGraph::getNextFromDir(Direction direction){
     }
     return std::pair<int,int>(currentX+nextX, currentY+nextY);
 };
+
+
+void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
+{
+    auto startRoom    = std::pair<int,int>(0,0);
+    auto treasureRoom = std::pair<int,int>(3,4);
+    auto bossRoom     = std::pair<int,int>(2,1);
+
+    generatePath(startRoom, treasureRoom, walkCallback);
+    generatePath(startRoom, bossRoom, walkCallback);
+}
+
+void RoomGraph::generatePath(std::pair<int, int> startRoom,
+                             std::pair<int, int> targetRoom,
+                             std::function<void(Direction)> walkCallback)
+{
+    const int xMin = std::min(startRoom.first, targetRoom.first);
+    const int xMax = std::max(startRoom.first, targetRoom.first);
+
+    const int yMin = std::min(startRoom.second, targetRoom.second);
+    const int yMax = std::max(startRoom.second, targetRoom.second);
+
+    // Create corridor in Y axis
+    for (int y = yMin; y < yMax; ++y) {
+        int x = startRoom.first;
+
+        if (!graph[x][y]) {
+            graph[x][y] = std::make_shared<Room>(false);
+
+            if (y < yMax) {
+                graph[x][y]->addDoor(Direction::UP, walkCallback);
+            }
+            if (y > yMin) {
+                graph[x][y]->addDoor(Direction::DOWN, walkCallback);
+            }
+        }
+    }
+
+    // Create corridor in X axis
+    for (int x = xMin; x < xMax; ++x) {
+        int y = targetRoom.second;
+
+        if (!graph[x][y]) {
+            graph[x][y] = std::make_shared<Room>(false);
+
+            if (x < xMax) {
+                graph[x][y]->addDoor(Direction::RIGHT, walkCallback);
+            }
+            if (x > xMin) {
+                graph[x][y]->addDoor(Direction::LEFT, walkCallback);
+            }
+        }
+    }
+}
 
