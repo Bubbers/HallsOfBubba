@@ -91,7 +91,7 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
         if (!graph[x][y]) {
             graph[x][y] = std::make_shared<Room>(false);
 
-            if (x < xMax) {
+            if (x < (xMax - 1)) {
                 graph[x][y]->addDoor(Direction::RIGHT, walkCallback);
             }
             if (x > xMin) {
