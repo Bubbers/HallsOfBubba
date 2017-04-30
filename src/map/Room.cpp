@@ -15,6 +15,7 @@
 #include <ParticleRenderer.h>
 #include <particles/BackgroundParticle.h>
 #include <particles/TorchParticle.h>
+#include <particles/FirstAttackParticle.h>
 #include <particles/SecondAttackParticle.h>
 #include "Room.h"
 
@@ -46,28 +47,25 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
     m_scene = std::make_shared<Scene>();
-    auto spawnBullet = [this, camera](GameObject *shooter, std::shared_ptr<Texture> particleTexture) mutable {
-        chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
-        chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
-        chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
+    auto spawnBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
+        auto bulletObject = generateBulletBase(shooter);
 
-        auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
-                                                                         "",
-                                                                         "");
-        auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
+        std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+        std::shared_ptr<FirstAttackParticle> backgroundParticleConf = std::make_shared<FirstAttackParticle>();
 
-        auto bulletObject = std::make_shared<GameObject>(bulletMesh);
-        bulletObject->setLocation(shooter->getAbsoluteLocation());
-        bulletObject->setRotation(shooter->getAbsoluteRotation());
-        bulletObject->setScale(chag::make_vector(3.0f, 3.0f, 3.0f));
-        bulletObject->addComponent(new TimedLife(20.0f));
-        bulletObject->addComponent(new MoveComponent(
-                chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
-                direction * 10,
-                chag::make_vector(0.0f, 0.0f, 0.0f),
-                chag::make_vector(0.0f, 0.0f, 0.0f)
-        ));
+        ParticleGenerator *gen = new ParticleGenerator(200, particleRenderer, backgroundParticleConf, camera);
+        GameObject *particleGenerator = new GameObject(bulletObject.get());
+        particleGenerator->addRenderComponent(gen);
+        particleGenerator->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+        bulletObject->addChild(particleGenerator);
+        particleGenerator->initializeModelMatrix();
 
+        m_scene->addShadowCaster(bulletObject);
+        m_shootSound->play();
+    };
+
+    auto spawnBlastBullet = [&](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
+        auto bulletObject = generateBulletBase(shooter);
 
         std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
         std::shared_ptr<SecondAttackParticle> backgroundParticleConf = std::make_shared<SecondAttackParticle>();
@@ -79,31 +77,26 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
         bulletObject->addChild(particleGenerator);
         particleGenerator->initializeModelMatrix();
 
-        int shootId = 0;
-        if (shooter->getIdentifier() == PLAYER_IDENTIFIER) {
-            shootId = PLAYER_SPAWNED_BULLET;
-            bulletObject->addCollidesWith(ENEMY_IDENTIFIER);
-        } else {
-            shootId = ENEMY_SPAWNED_BULLET;
-            bulletObject->addCollidesWith(PLAYER_IDENTIFIER);
-        }
-        bulletObject->setIdentifier(shootId);
-        bulletObject->addCollidesWith({DOOR_IDENTIFIER, OBSTACLE_IDENTIFIER, WALL_IDENTIFIER});
-        bulletObject->addComponent(new DirtyBulletOnCollision());
-
-        bulletObject->update(0);
-        StandardRenderer *stdRenderer = new StandardRenderer(bulletMesh, standardShader);
-        bulletObject->addRenderComponent(stdRenderer);
-        bulletObject->setDynamic(true);
-
         m_scene->addShadowCaster(bulletObject);
         m_shootSound->play();
     };
 
     createWalls();
 
+    std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
+    pointLight->diffuseColor= chag::make_vector(0.50f,0.50f,0.20f);
+    pointLight->specularColor= chag::make_vector(0.00f,0.00f,0.00f);
+    pointLight->ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    pointLight->position = chag::make_vector(0.0f, 2.0f, 0.0f);
+    Attenuation att;
+
+    att.linear = 5;
+    pointLight->attenuation = att;
+    m_scene->pointLights.push_back(pointLight);
+
     auto playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
-    playerObject->addComponent(new PlayerController(spawnBullet, camera.get()));
+    playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight));
+
     allAlive.push_back(playerHealth);
     playerObject->addComponent(playerHealth);
     playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
@@ -169,7 +162,6 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     windObject->setIdentifier(OBSTACLE_IDENTIFIER);
     m_scene->addShadowCaster(windObject);
 
-
     // Obstacle mesh
     if (includeObstacle) {
         auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
@@ -183,11 +175,13 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
         obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
         m_scene->addShadowCaster(obstacleObject);
     }
+    addCrates(chag::make_vector(-9.0f, 0.0f, 0.0f));
+    addCrates(chag::make_vector(8.0f, 0.0f, -6.0f));
 
     auto torchMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/torch.obj");
 
     auto torchObject = std::make_shared<GameObject>(torchMesh);
-    torchObject->setLocation(chag::make_vector(-11.0f, 0.0f, -11.0f));
+    torchObject->setLocation(chag::make_vector(-5.0f, 0.0f, 9.0f));
     torchObject->setScale(chag::make_vector(5.0f, 5.0f, 5.0f));
     StandardRenderer *stdTorchRenderer = new StandardRenderer(torchMesh, standardShader);
     torchObject->addRenderComponent(stdTorchRenderer);
@@ -195,7 +189,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     m_scene->addShadowCaster(torchObject);
 
     auto torchObject2 = std::make_shared<GameObject>(torchMesh);
-    torchObject2->setLocation(chag::make_vector(11.0f, 0.0f, -11.0f));
+    torchObject2->setLocation(chag::make_vector(5.0f, 0.0f, 9.0f));
     torchObject2->setScale(chag::make_vector(5.0f, 5.0f, 5.0f));
     StandardRenderer *stdTorchRenderer2 = new StandardRenderer(torchMesh, standardShader);
     torchObject2->addRenderComponent(stdTorchRenderer2);
@@ -264,7 +258,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     ParticleGenerator *torchParticleGenerator = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
     GameObject *particleGeneratorObject = new GameObject(torchObject.get());
     particleGeneratorObject->addRenderComponent(torchParticleGenerator);
-    particleGeneratorObject->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+    particleGeneratorObject->setLocation(make_vector(-0.06f, 0.0f, 0.0f));
     particleGeneratorObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
     torchObject->addChild(particleGeneratorObject);
     particleGeneratorObject->initializeModelMatrix();
@@ -272,11 +266,33 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent* playerHe
     ParticleGenerator *torchParticleGenerator2 = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
     GameObject *particleGeneratorObject2 = new GameObject(torchObject2.get());
     particleGeneratorObject2->addRenderComponent(torchParticleGenerator2);
-    particleGeneratorObject2->setLocation(make_vector(0.0f, 0.0f, 0.0f));
+    particleGeneratorObject2->setLocation(make_vector(-0.06f, 0.0f, 0.0f));
     particleGeneratorObject2->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
     torchObject2->addChild(particleGeneratorObject2);
     particleGeneratorObject2->initializeModelMatrix();
 
+}
+
+void Room::addCrates(chag::float3 centerPosition) const {
+    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(1.0f, 0.0f, 1.0f)));
+    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(-1.0f, 0.0f, 1.0f)));
+    m_scene->addShadowCaster(getCrateObject(centerPosition, chag::make_vector(0.0f, 0.0f, -1.0f)));
+
+    const std::shared_ptr<GameObject> &object = getCrateObject(centerPosition, chag::make_vector(0.0f, 2.0f, 0.0f));
+    object->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), degreeToRad(135)));
+    m_scene->addShadowCaster(object);
+}
+
+std::shared_ptr<GameObject> Room::getCrateObject(float3 centerPosition, float3 offset) const {
+    std::shared_ptr<ShaderProgram> standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME, "", "");
+    std::shared_ptr<Mesh> obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");;
+    std::shared_ptr<GameObject> obstacleObject = std::make_shared<GameObject>(obstacleMesh);
+    obstacleObject->setLocation(centerPosition + offset);
+    //obstacleObject->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), degreeToRad(180)));
+    StandardRenderer* stdObstacleRenderer = new StandardRenderer(obstacleMesh, standardShader);
+    obstacleObject->addRenderComponent(stdObstacleRenderer);
+    obstacleObject->setIdentifier(OBSTACLE_IDENTIFIER);
+    return obstacleObject;
 }
 
 void Room::createWalls() {
@@ -333,36 +349,80 @@ void Room::display(Renderer &renderer,
 
 void Room::createLight() {
 
-    DirectionalLight directionalLight = DirectionalLight();
-    directionalLight.diffuseColor= chag::make_vector(0.550f,0.550f,0.550f);
-    directionalLight.specularColor= chag::make_vector(0.050f,0.050f,0.050f);
-    directionalLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    std::shared_ptr<DirectionalLight> directionalLight = std::make_shared<DirectionalLight>();
+    directionalLight->diffuseColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight->specularColor= chag::make_vector(0.050f,0.050f,0.050f);
+    directionalLight->ambientColor= chag::make_vector(0.000f,0.000f,0.000f);
 
-    directionalLight.direction= -chag::make_vector(0.0f,-10.0f,0.0f);
+    directionalLight->direction= -chag::make_vector(0.0f,-10.0f,10.0f);
     m_scene->directionalLight = directionalLight;
 
-    PointLight pointLight;
-    pointLight.diffuseColor= chag::make_vector(5.50f,0.50f,0.50f);
-    pointLight.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
-    pointLight.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
-    pointLight.position = chag::make_vector(-11.0f, 2.0f, -11.0f);
+    std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
+    pointLight->diffuseColor= chag::make_vector(6.50f,3.50f,1.00f);
+    pointLight->specularColor= chag::make_vector(0.05f,0.02f,0.005f);
+    pointLight->ambientColor= chag::make_vector(0.350f,.350f,0.350f);
+    pointLight->position = chag::make_vector(-5.0f, 2.0f, 9.0f);
     Attenuation att;
 
-    att.linear = 2;
-    pointLight.attenuation = att;
+    att.linear = 1;
+    att.exp = 1;
+    pointLight->attenuation = att;
     m_scene->pointLights.push_back(pointLight);
 
-    PointLight pointLight2;
-    pointLight2.diffuseColor= chag::make_vector(5.50f,0.50f,0.50f);
-    pointLight2.specularColor= chag::make_vector(0.00f,0.00f,0.00f);
-    pointLight2.ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
-    pointLight2.position = chag::make_vector(11.0f, 2.0f, -11.0f);
-    pointLight2.attenuation = att;
+    std::shared_ptr<PointLight> pointLight2 = std::make_shared<PointLight>();
+    pointLight2->diffuseColor= chag::make_vector(6.50f,3.50f,1.00f);
+    pointLight2->specularColor= chag::make_vector(0.05f,0.02f,0.005f);
+    pointLight2->ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    pointLight2->position = chag::make_vector(5.0f, 2.0f, 9.0f);
+    pointLight2->attenuation = att;
     m_scene->pointLights.push_back(pointLight2);
 }
 
 void Room::addDoor(Direction direction, std::function<void(Direction direction)> callback) {
-
     doors.push_back(std::pair<Direction, std::function<void(Direction)>>(direction, callback));
+}
 
+std::shared_ptr<GameObject> Room::generateBulletBase(GameObject* shooter) {
+    if(shooter == nullptr) {
+        return std::shared_ptr<GameObject>();
+    }
+    chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
+    chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
+    chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
+
+    auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
+                                                                     "",
+                                                                     "");
+    auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
+
+    auto bulletObject = std::make_shared<GameObject>(bulletMesh);
+    bulletObject->setLocation(shooter->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f));
+    bulletObject->setRotation(shooter->getAbsoluteRotation());
+    bulletObject->setScale(chag::make_vector(3.0f,3.0f,3.0f));
+    bulletObject->addComponent(new TimedLife(20.0f));
+    bulletObject->addComponent(new MoveComponent(
+            chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), 0.0f),
+            direction * 10,
+            chag::make_vector(0.0f, 0.0f, 0.0f),
+            chag::make_vector(0.0f, 0.0f, 0.0f)
+    ));
+
+    int shootId = 0;
+    if (shooter->getIdentifier() == PLAYER_IDENTIFIER) {
+        shootId = PLAYER_SPAWNED_BULLET;
+        bulletObject->addCollidesWith(ENEMY_IDENTIFIER);
+    } else {
+        shootId = ENEMY_SPAWNED_BULLET;
+        bulletObject->addCollidesWith(PLAYER_IDENTIFIER);
+    }
+    bulletObject->setIdentifier(shootId);
+    bulletObject->addCollidesWith({DOOR_IDENTIFIER, OBSTACLE_IDENTIFIER, WALL_IDENTIFIER});
+    bulletObject->addComponent(new DirtyBulletOnCollision());
+
+    bulletObject->update(0);
+    StandardRenderer* stdRenderer = new StandardRenderer(bulletMesh, standardShader);
+    bulletObject->addRenderComponent(stdRenderer);
+    bulletObject->setDynamic(true);
+
+    return bulletObject;
 }

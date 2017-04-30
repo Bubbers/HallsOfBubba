@@ -12,7 +12,7 @@
 class PlayerController : public IComponent {
 
 public:
-    PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, Camera *camera);
+    PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc, Camera *camera, std::shared_ptr<PointLight> light);
     chag::float3 getPlaneIntersectionPoint();
 
     virtual void update(float dt) override;
@@ -23,10 +23,12 @@ public:
 
 private:
     std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc;
+    std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc;
     Camera *camera;
     float timeSinceLastShotAttackLMB = 1.0f;
     float timeSinceLastShotAttackRMB = 1.0f;
     chag::float3 locationAtLastUpdate;
+    std::shared_ptr<PointLight> light;
 
     chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
 };

@@ -37,9 +37,12 @@ private:
     std::vector<HealthComponent*> allAlive;
 
     std::shared_ptr<sf::Sound> m_shootSound;
-
     std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
 
     bool includeObstacle;
     bool isLoaded = false;
+    void addCrates(chag::float3 centerPosition) const;
+
+    std::shared_ptr<GameObject> getCrateObject(chag::float3 centerPosition, chag::float3 offset) const;
+    std::shared_ptr<GameObject> generateBulletBase(GameObject* shooter);
 };

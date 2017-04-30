@@ -8,12 +8,13 @@
 #include <linmath/SmallVector2.h>
 #include <Globals.h>
 #include <ResourceManager.h>
+#include <Lights.h>
 #include "PlayerController.h"
 #include "Camera.h"
 
 
-PlayerController::PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, Camera *camera) :
-        spawnBulletFunc(spawnBulletFunc), camera(camera){
+PlayerController::PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc, Camera *camera, std::shared_ptr<PointLight> light) :
+        spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light){
 
 }
 
@@ -90,7 +91,7 @@ void PlayerController::update(float dt) {
         if (shootButton.isActive()) {
             for (int i = 0; i < 8; ++i) {
                 owner->setRotation(owner->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
-                spawnBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
+                spawnBlastBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
             }
             timeSinceLastShotAttackRMB = 0.0f;
         }
@@ -107,6 +108,7 @@ void PlayerController::update(float dt) {
     }
 
     owner->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
+    light->position = owner->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f);
 }
 
 void PlayerController::beforeCollision(std::shared_ptr<GameObject> collider) {

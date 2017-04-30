@@ -3,7 +3,7 @@
 
 chag::float3 TorchParticle::initialPosition() {
     float rand = getRand(0.0f, 360.0f);
-    float rand2  = getRand(0.0f, 0.3f);
+    float rand2  = getRand(0.0f, 0.5f);
     return chag::make_vector((float)cos(rand) * rand2 * 2, (float)sin(rand) * rand2, (float)sin(rand) * rand2 * 2);
 }
 
@@ -20,7 +20,7 @@ float TorchParticle::calcLifetime() {
 }
 
 chag::float3 TorchParticle::calcParticleScale() {
-    return chag::make_vector(.05f, .05f, .05f);
+    return chag::make_vector(.20f, .20f, .20f);
 }
 
 bool TorchParticle::loop(float dt) {
