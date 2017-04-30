@@ -51,16 +51,16 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
     auto treasureRoom = std::pair<int, int>(6, 4);
     auto bossRoom     = std::pair<int, int>(0, 1);
 
-    generatePath(startRoom, treasureRoom, walkCallback);
-    generatePath(startRoom, bossRoom, walkCallback);
+    generatePath(startRoom, treasureRoom);
+    generatePath(startRoom, bossRoom);
+    generateDoors(walkCallback);
 
     currentX = startRoom.first;
     currentY = startRoom.second;
 }
 
 void RoomGraph::generatePath(std::pair<int, int> startRoom,
-                             std::pair<int, int> targetRoom,
-                             std::function<void(Direction)> walkCallback)
+                             std::pair<int, int> targetRoom)
 {
     const int xMin = std::min(startRoom.first, targetRoom.first);
     const int xMax = std::max(startRoom.first, targetRoom.first);
@@ -74,13 +74,6 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
 
         if (!graph[x][y]) {
             graph[x][y] = std::make_shared<Room>(false);
-
-            if (y < yMax) {
-                graph[x][y]->addDoor(Direction::UP, walkCallback);
-            }
-            if (y > yMin) {
-                graph[x][y]->addDoor(Direction::DOWN, walkCallback);
-            }
         }
     }
 
@@ -90,12 +83,26 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
 
         if (!graph[x][y]) {
             graph[x][y] = std::make_shared<Room>(false);
+        }
+    }
+}
 
-            if (x < (xMax - 1)) {
-                graph[x][y]->addDoor(Direction::RIGHT, walkCallback);
-            }
-            if (x > xMin) {
-                graph[x][y]->addDoor(Direction::LEFT, walkCallback);
+void RoomGraph::generateDoors(std::function<void(Direction)> walkCallback) {
+    for (int x = 0; x < 7; ++x) {
+        for (int y = 0; y < 7; ++y) {
+            if(graph[x][y]) {
+                if (y + 1 < 7 && graph[x][y + 1]) {
+                    graph[x][y]->addDoor(Direction::UP, walkCallback);
+                }
+                if (y > 0 && graph[x][y - 1]) {
+                    graph[x][y]->addDoor(Direction::DOWN, walkCallback);
+                }
+                if (x + 1 < 7 && graph[x + 1][y]) {
+                    graph[x][y]->addDoor(Direction::RIGHT, walkCallback);
+                }
+                if (x > 0 && graph[x - 1][y]) {
+                    graph[x][y]->addDoor(Direction::LEFT, walkCallback);
+                }
             }
         }
     }
