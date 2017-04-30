@@ -1,55 +1,60 @@
-
 #pragma once
 
+
+#include <cameras/TopDownCamera.h>
+#include <components/HealthComponent.h>
 #include <Scene.h>
 #include <Collider.h>
 #include <Renderer.h>
-#include <AudioManager.h>
-#include <cameras/TopDownCamera.h>
-#include <map/Direction.h>
-#include <components/HealthComponent.h>
-
-class HudRenderer;
+#include "Direction.h"
+#include "HudRenderer.h"
 
 class Room {
-
 public:
-    Room(bool includeObstacle);
-    ~Room();
-
     void load(std::shared_ptr<TopDownCamera> camera, HealthComponent* player, Direction enteredDirection);
-    void addDoor(Direction direction, std::function<void(Direction)> callback);
-    void update(float dt);
+    void addDoor(Direction direction, std::function<void(Direction direction)> callback);
+
     void display(Renderer &renderer,
                  std::shared_ptr<Camera> camera,
                  float timeSinceStart,
                  float timeSinceLastCall);
 
+    void update(float dt);
 
-private:
-    void createLight();
-    void createWalls();
+protected:
+
+    virtual void loadLights() {};
+    virtual void loadGameObjects() {};
+
+    bool isLoaded = false;
+
+    std::vector<HealthComponent*> allAlive;
 
     std::shared_ptr<Scene> m_scene;
     std::shared_ptr<Collider> m_collider;
+    std::shared_ptr<GameObject> playerObject;
+    std::shared_ptr<TopDownCamera> camera;
+
+    void loadBulletFunctions(std::shared_ptr<TopDownCamera> camera);
+
+    std::shared_ptr<GameObject> generateBulletBase(GameObject *shooter);
+
+    std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
 
     HudRenderer* hudRenderer;
-    std::vector<HealthComponent*> allAlive;
 
     std::shared_ptr<sf::Sound> m_shootSound;
     std::shared_ptr<sf::Sound> m_blastSound;
+    std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet;
+    std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBlastBullet;
 
-    std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
-    bool includeObstacle;
-    bool isLoaded = false;
+private:
+    void loadWalls();
+    void loadDoors();
+    void loadFloor();
 
-    void addCrates(chag::float3 centerPosition) const;
-    std::shared_ptr<GameObject> getCrateObject(chag::float3 centerPosition, chag::float3 offset) const;
-
-    std::shared_ptr<GameObject> generateBulletBase(GameObject* shooter);
-
-    std::shared_ptr<GameObject> getEnemyObject(std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet,
-                                               std::shared_ptr<GameObject> playerObject,
-                                               HudRenderer *hudRenderer,
-                                               chag::float3 location);
+    void loadPlayer(HealthComponent *pComponent);
 };
+
+
+

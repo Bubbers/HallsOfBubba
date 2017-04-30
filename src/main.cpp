@@ -10,12 +10,12 @@
 #include <map/RoomGraph.h>
 #include <components/HealthComponent.h>
 #include "cameras/TopDownCamera.h"
-#include "map/Room.h"
+#include "map/HallwayRoom.h"
 #include "controls.h"
 #include "ObjectIdentifiers.h"
 
 Renderer renderer;
-std::shared_ptr<Room> room;
+std::shared_ptr<HallwayRoom> room;
 std::shared_ptr<RoomGraph> roomGraph;
 HealthComponent* playerHealth;
 
