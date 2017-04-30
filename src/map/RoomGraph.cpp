@@ -3,18 +3,19 @@
 //
 
 #include "RoomGraph.h"
+#include "HallwayRoom.h"
 
 RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback) {
     generateGraph(walkCallback);
 }
 
-std::shared_ptr<HallwayRoom> RoomGraph::getCurrentRoom(){
+std::shared_ptr<Room> RoomGraph::getCurrentRoom(){
     return graph[currentX][currentY];
 }
 
 void RoomGraph::walk(Direction direction) {
     std::pair<int, int> next = getNextFromDir(direction);
-    std::shared_ptr<HallwayRoom> theRoom = graph[next.first][next.second];
+    std::shared_ptr<Room> theRoom = graph[next.first][next.second];
     if(!theRoom){
         throw "Tried to get a room that didn't exist";
     }
@@ -22,7 +23,7 @@ void RoomGraph::walk(Direction direction) {
     currentY = next.second;
 }
 
-void RoomGraph::addPath(std::shared_ptr<HallwayRoom> nextRoom, Direction direction) {
+void RoomGraph::addPath(std::shared_ptr<Room> nextRoom, Direction direction) {
     std::pair<int, int> offset = getNextFromDir(direction);
     if(!graph[offset.first][offset.second]){
         throw "You can't assign a direction two different rooms.";

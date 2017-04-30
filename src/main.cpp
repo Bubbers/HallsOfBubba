@@ -15,7 +15,7 @@
 #include "ObjectIdentifiers.h"
 
 Renderer renderer;
-std::shared_ptr<HallwayRoom> room;
+std::shared_ptr<Room> room;
 std::shared_ptr<RoomGraph> roomGraph;
 HealthComponent* playerHealth;
 
