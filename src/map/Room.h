@@ -47,4 +47,9 @@ private:
     std::shared_ptr<GameObject> getCrateObject(chag::float3 centerPosition, chag::float3 offset) const;
 
     std::shared_ptr<GameObject> generateBulletBase(GameObject* shooter);
+
+    std::shared_ptr<GameObject> getEnemyObject(std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet,
+                                               std::shared_ptr<GameObject> playerObject,
+                                               HudRenderer *hudRenderer,
+                                               chag::float3 location);
 };

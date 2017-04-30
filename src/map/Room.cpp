@@ -48,7 +48,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
     m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
     auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_animated.fbx");
     auto playerCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
-    auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
+
 
     m_scene = std::make_shared<Scene>();
     auto spawnBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
@@ -85,6 +85,14 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
         m_blastSound->play();
     };
 
+    // HUD
+    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
+    hudRenderer = new HudRenderer();
+    hudRenderer->setWorldCamera(camera.get());
+    hudObj->addRenderComponent(hudRenderer);
+    m_scene->addTransparentObject(hudObj);
+
+
     createWalls();
 
     std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
@@ -111,38 +119,20 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
     playerObject->setIdentifier(PLAYER_IDENTIFIER);
     playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
     m_scene->addShadowCaster(playerObject);
-    //Enemy mesh
-    auto monsterObject = std::make_shared<GameObject>(monsterMesh, playerCollisionMesh);
-    HealthComponent *monsterHealth = new HealthComponent(2);
-    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
-    allAlive.push_back(monsterHealth);
-    monsterObject->addComponent(monsterHealth);
-    monsterObject->setLocation(chag::make_vector(-8.0f, 0.0f, 8.0f));
-    monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
-    monsterObject->initializeModelMatrix();
-    StandardRenderer *stdMonsterRenderer = new StandardRenderer(monsterMesh, standardShader);
-    monsterObject->addRenderComponent(stdMonsterRenderer);
-    monsterObject->setDynamic(true);
-    monsterObject->setIdentifier(ENEMY_IDENTIFIER);
-    monsterObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
+    HealthBar* playerHealthBar = new HealthBar(playerHealth);
+    hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
 
+    //Enemy mesh
+    std::shared_ptr<GameObject> monsterObject = getEnemyObject(spawnBullet,
+                                                               playerObject,
+                                                               hudRenderer,
+                                                               make_vector(-8.0f, 0.0f, 8.0f));
     m_scene->addShadowCaster(monsterObject);
 
-    //Enemy mesh2
-    auto monsterObject2 = std::make_shared<GameObject>(monsterMesh, playerCollisionMesh);
-    HealthComponent *monsterHealth2 = new HealthComponent(2);
-    monsterObject2->addComponent(new EnemyComponent(spawnBullet, playerObject));
-    allAlive.push_back(monsterHealth2);
-    monsterObject2->addComponent(monsterHealth2);
-    monsterObject2->setLocation(chag::make_vector(8.0f, 0.0f, 8.0f));
-    monsterObject2->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
-    monsterObject2->initializeModelMatrix();
-    StandardRenderer *stdMonsterRenderer2 = new StandardRenderer(monsterMesh, standardShader);
-    monsterObject2->addRenderComponent(stdMonsterRenderer2);
-    monsterObject2->setDynamic(true);
-    monsterObject2->setIdentifier(ENEMY_IDENTIFIER);
-    monsterObject2->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
-
+    std::shared_ptr<GameObject> monsterObject2 = getEnemyObject(spawnBullet,
+                                                                playerObject,
+                                                                hudRenderer,
+                                                                make_vector(8.0f, 0.0f, 8.0f));
     m_scene->addShadowCaster(monsterObject2);
 
     // Ground mesh
@@ -227,19 +217,8 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
         m_scene->addShadowCaster(doorObject);
     }
 
-    // HUD
-    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
-    hudRenderer = new HudRenderer();
-    hudRenderer->setWorldCamera(camera.get());
-    hudObj->addRenderComponent(hudRenderer);
-    HealthBar* playerHealthBar = new HealthBar(playerHealth);
-    hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
-    HealthBar* monsterHealthBar = new HealthBar(monsterHealth);
-    hudRenderer->addRelativeLayout(monsterObject, monsterHealthBar);
-    HealthBar* monsterHealthBar2 = new HealthBar(monsterHealth2);
-    hudRenderer->addRelativeLayout(monsterObject2, monsterHealthBar2);
 
-    m_scene->addTransparentObject(hudObj);
+
 
     createLight();
 
@@ -276,6 +255,37 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
     torchObject2->addChild(particleGeneratorObject2);
     particleGeneratorObject2->initializeModelMatrix();
 
+}
+
+std::shared_ptr<GameObject> Room::getEnemyObject(std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet,
+                                                 std::shared_ptr<GameObject> playerObject,
+                                                 HudRenderer *hudRenderer,
+                                                 chag::float3 location)
+{
+    auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
+                                                                     "",
+                                                                     "");
+    auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
+    auto monsterCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
+    auto monsterObject = std::make_shared<GameObject>(monsterMesh, monsterCollisionMesh);
+    HealthComponent *monsterHealth = new HealthComponent(2);
+
+    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
+    allAlive.push_back(monsterHealth);
+    monsterObject->addComponent(monsterHealth);
+    monsterObject->setLocation(location);
+    monsterObject->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
+    monsterObject->initializeModelMatrix();
+    StandardRenderer *stdMonsterRenderer = new StandardRenderer(monsterMesh, standardShader);
+    monsterObject->addRenderComponent(stdMonsterRenderer);
+    monsterObject->setDynamic(true);
+    monsterObject->setIdentifier(ENEMY_IDENTIFIER);
+    monsterObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
+
+    HealthBar* monsterHealthBar = new HealthBar(monsterHealth);
+    hudRenderer->addRelativeLayout(monsterObject, monsterHealthBar);
+
+    return monsterObject;
 }
 
 void Room::addCrates(chag::float3 centerPosition) const {
