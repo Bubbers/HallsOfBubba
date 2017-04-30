@@ -16,6 +16,7 @@
 #include <components/WinOnCollisionComponent.h>
 #include <components/PlayerController.h>
 #include <ui/HealthBar.h>
+#include <particles/TorchParticle.h>
 #include "Room.h"
 #include "HallwayRoom.h"
 
@@ -271,3 +272,40 @@ void Room::loadPlayer(HealthComponent *playerHealth) {
     hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
 }
 
+void Room::createTorch(chag::float3 location)  {
+    auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
+                                                                     "",
+                                                                     "");
+    auto torchMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/torch.obj");
+
+    std::shared_ptr<GameObject> torchObject= std::make_shared<GameObject>(torchMesh);
+    torchObject->setLocation(location);
+    torchObject->setScale(make_vector(5.0f, 5.0f, 5.0f));
+    StandardRenderer *stdTorchRenderer = new StandardRenderer(torchMesh, standardShader);
+    torchObject->addRenderComponent(stdTorchRenderer);
+    torchObject->setIdentifier(OBSTACLE_IDENTIFIER);
+    m_scene->addShadowCaster(torchObject);
+
+    std::shared_ptr<Texture> particleTexture = ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png");
+    std::shared_ptr<ParticleRenderer> torchParticleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+    std::shared_ptr<TorchParticle> torchParticleConf = std::make_shared<TorchParticle>();
+    ParticleGenerator *torchParticleGenerator = new ParticleGenerator(500, torchParticleRenderer, torchParticleConf, camera);
+    GameObject *particleGeneratorObject = new GameObject(torchObject.get());
+    particleGeneratorObject->addRenderComponent(torchParticleGenerator);
+    particleGeneratorObject->setLocation(make_vector(-0.06f, 0.0f, 0.0f));
+    particleGeneratorObject->setScale(chag::make_vector(0.1f, 0.1f, 0.1f));
+    torchObject->addChild(particleGeneratorObject);
+    particleGeneratorObject->initializeModelMatrix();
+
+    std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
+    pointLight->diffuseColor= chag::make_vector(6.50f,3.50f,1.00f);
+    pointLight->specularColor= chag::make_vector(0.05f,0.02f,0.005f);
+    pointLight->ambientColor= chag::make_vector(0.350f,.350f,0.350f);
+    pointLight->position = location + chag::make_vector(0.0f, 2.0f, 0.0f);
+    Attenuation att;
+
+    att.linear = 1;
+    att.exp = 1;
+    pointLight->attenuation = att;
+    m_scene->pointLights.push_back(pointLight);
+}

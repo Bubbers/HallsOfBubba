@@ -26,6 +26,8 @@ protected:
     virtual void loadLights() {};
     virtual void loadGameObjects() {};
 
+    void createTorch(chag::float3 location);
+
     bool isLoaded = false;
 
     std::vector<HealthComponent*> allAlive;
@@ -54,6 +56,7 @@ private:
     void loadFloor();
 
     void loadPlayer(HealthComponent *pComponent);
+
 };
 
 
