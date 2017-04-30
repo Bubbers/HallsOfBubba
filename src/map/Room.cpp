@@ -45,7 +45,8 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
                                                                      "");
 
     m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
-    auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
+    m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
+    auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_animated.fbx");
     auto playerCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
 
@@ -81,7 +82,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
         particleGenerator->initializeModelMatrix();
 
         m_scene->addShadowCaster(bulletObject);
-        m_shootSound->play();
+        m_blastSound->play();
     };
 
     createWalls();
@@ -103,6 +104,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera,
     allAlive.push_back(playerHealth);
     playerObject->addComponent(playerHealth);
     playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 0.0f));
+    //playerObject->setScale(chag::make_vector(0.01f, 0.01f, 0.01f));
     StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
     playerObject->addRenderComponent(stdrenderer);
     playerObject->setDynamic(true);
