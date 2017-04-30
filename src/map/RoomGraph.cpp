@@ -47,9 +47,9 @@ std::pair<int, int> RoomGraph::getNextFromDir(Direction direction){
 
 void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
 {
-    auto startRoom    = std::pair<int,int>(0,0);
-    auto treasureRoom = std::pair<int,int>(3,4);
-    auto bossRoom     = std::pair<int,int>(2,1);
+    auto startRoom    = std::pair<int, int>(3, 0);
+    auto treasureRoom = std::pair<int, int>(6, 4);
+    auto bossRoom     = std::pair<int, int>(0, 1);
 
     generatePath(startRoom, treasureRoom, walkCallback);
     generatePath(startRoom, bossRoom, walkCallback);
