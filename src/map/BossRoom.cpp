@@ -4,6 +4,7 @@
 #include <components/BossController.h>
 #include <constants.h>
 #include <ui/HealthBar.h>
+#include <components/BossDeathWin.h>
 #include "BossRoom.h"
 
 BossRoom::BossRoom() {}
@@ -50,6 +51,7 @@ void BossRoom::createBoss() {
     bossObject->setDynamic(true);
     bossObject->setIdentifier(ENEMY_IDENTIFIER);
     bossObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
+    bossObject->addComponent(new BossDeathWin(hudRenderer));
 
     HealthBar* monsterHealthBar = new HealthBar(bossHealth);
     hudRenderer->addRelativeLayout(bossObject, monsterHealthBar);
