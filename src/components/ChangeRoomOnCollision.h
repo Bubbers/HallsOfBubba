@@ -6,9 +6,9 @@
 #include <Scene.h>
 #include <AudioManager.h>
 
-class WinOnCollisionComponent: public IComponent {
+class ChangeRoomOnCollision: public IComponent {
 public:
-    WinOnCollisionComponent(std::shared_ptr<Scene> scene, std::function<void(void)> onWin);
+    ChangeRoomOnCollision(std::shared_ptr<Scene> scene, std::function<void(void)> onCollision);
     void beforeCollision(std::shared_ptr<GameObject> collider);
     void update(float dt);
 
@@ -17,7 +17,7 @@ private:
 
     std::shared_ptr<sf::Sound> m_sound;
 
-    std::function<void(void)> onWin;
+    std::function<void(void)> onCollision;
 };
 
 

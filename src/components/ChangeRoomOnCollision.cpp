@@ -1,12 +1,12 @@
 #include <ObjectIdentifiers.h>
-#include "WinOnCollisionComponent.h"
+#include "ChangeRoomOnCollision.h"
 
-WinOnCollisionComponent::WinOnCollisionComponent(std::shared_ptr<Scene> scene, std::function<void(void)> onWin)
-        :scene(scene), onWin(onWin) {
+ChangeRoomOnCollision::ChangeRoomOnCollision(std::shared_ptr<Scene> scene, std::function<void(void)> onCollision)
+        :scene(scene), onCollision(onCollision) {
      m_sound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/win.wav"));
 }
 
-void WinOnCollisionComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
+void ChangeRoomOnCollision::beforeCollision(std::shared_ptr<GameObject> collider) {
     int numEnemies = 0;
     for(auto gameObject : scene->getGameObjects()) {
         if(gameObject->getIdentifier() == ENEMY_IDENTIFIER) {
@@ -14,12 +14,11 @@ void WinOnCollisionComponent::beforeCollision(std::shared_ptr<GameObject> collid
         }
     }
     if(collider->getIdentifier() == PLAYER_IDENTIFIER && numEnemies == 0) {
-        printf("WIN\n");
         m_sound->play();
-        onWin();
+        onCollision();
     }
 }
 
-void WinOnCollisionComponent::update(float dt) {
+void ChangeRoomOnCollision::update(float dt) {
 
 }
