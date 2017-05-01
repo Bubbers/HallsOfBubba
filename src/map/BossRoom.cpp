@@ -51,6 +51,9 @@ void BossRoom::createBoss() {
     bossObject->setIdentifier(ENEMY_IDENTIFIER);
     bossObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
 
+    HealthBar* monsterHealthBar = new HealthBar(bossHealth);
+    hudRenderer->addRelativeLayout(bossObject, monsterHealthBar);
+
     m_scene->addShadowCaster(bossObject);
 }
 
