@@ -13,7 +13,7 @@
 #include <components/DirtyBulletOnCollision.h>
 #include <StandardRenderer.h>
 #include <particles/BackgroundParticle.h>
-#include <components/WinOnCollisionComponent.h>
+#include <components/ChangeRoomOnCollision.h>
 #include <components/PlayerController.h>
 #include <ui/HealthBar.h>
 #include <particles/TorchParticle.h>
@@ -217,7 +217,7 @@ void Room::loadDoors() {
         doorObject->setRotation(rotation);
         StandardRenderer *stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
         doorObject->addRenderComponent(stdDoorRenderer);
-        doorObject->addComponent(new WinOnCollisionComponent(m_scene, [door]() -> void { door.second(door.first); }));
+        doorObject->addComponent(new ChangeRoomOnCollision(m_scene, [door]() -> void { door.second(door.first); }));
         doorObject->setIdentifier(DOOR_IDENTIFIER);
 
         m_scene->addShadowCaster(doorObject);

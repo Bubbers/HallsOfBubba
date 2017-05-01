@@ -1,5 +1,5 @@
 set(GAME_SOURCE_FILES
-        components/WinOnCollisionComponent.cpp
+        components/ChangeRoomOnCollision.cpp
         components/PlayerController.cpp
         components/HealthComponent.cpp
         components/EnemyComponent.cpp
