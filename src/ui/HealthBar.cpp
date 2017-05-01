@@ -19,7 +19,7 @@ HealthBar::HealthBar(HealthComponent* health) : health(health), PositioningLayou
     ListLayout* root = new ListLayout(ListLayout::VERTICAL,Dimension::fromPixels(50),Dimension::fromPixels(35));
 
     Font* font = FontManager::getInstance()->loadAndFetchFont("../fonts/Ubuntu-M.ttf",20);
-    TextLayout* name = new TextLayout("text",font,Dimension::fromPixels(50),Dimension::fromPixels(25));
+    TextLayout* name = new TextLayout("",font,Dimension::fromPixels(50),Dimension::fromPixels(25));
 
     PositioningLayout* border = new PositioningLayout(Dimension::fill(),Dimension::fromPixels(10));
     border->setBackground((new HUDGraphic(HUDGraphic::Color(string("#000"),0)))->setBorder(1, HUDGraphic::Color(string("#000"))));
