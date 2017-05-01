@@ -7,7 +7,7 @@
 #include <components/PlayerController.h>
 #include <components/HealthComponent.h>
 #include <components/EnemyComponent.h>
-#include <components/WinOnCollisionComponent.h>
+#include <components/ChangeRoomOnCollision.h>
 #include <ui/HealthBar.h>
 #include <components/TimedLife.h>
 #include <components/DirtyBulletOnCollision.h>
@@ -94,15 +94,16 @@ void HallwayRoom::loadGameObjects() {
     randomlyGenerateObjectAtPos(chag::make_vector(-8.0f, 0.0f, 8.0f));
     randomlyGenerateObjectAtPos(chag::make_vector(-8.0f, 0.0f, -8.0f));
     randomlyGenerateObjectAtPos(chag::make_vector(8.0f, 0.0f, -8.0f));
+    randomlyGenerateObjectAtPos(chag::make_vector(0.0f, 0.0f, 0.0f));
 
-    createTorch(chag::make_vector(0.0f, 0.0f, 0.0f));
+
 }
 
 void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
-    int randomNum = rand() % 4;
+    int randomNum = rand() % 5;
 
     if(randomNum == 0) {
         auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
@@ -120,7 +121,7 @@ void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
     } else if(randomNum == 2) {
         addCrates(location);
     } else if(randomNum == 3) {
-
+        createTorch(location);
     }
 }
 
