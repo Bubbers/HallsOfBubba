@@ -13,7 +13,7 @@ class BossController : public EnemyComponent {
 
 public:
 
-    BossController(std::function<void(GameObject*, std::shared_ptr<Texture>)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
+    BossController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
 
     virtual void update(float dt);
 

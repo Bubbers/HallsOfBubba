@@ -39,7 +39,7 @@ protected:
 
     void loadBulletFunctions(std::shared_ptr<TopDownCamera> camera);
 
-    std::shared_ptr<GameObject> generateBulletBase(GameObject *shooter);
+    std::shared_ptr<GameObject> generateBulletBase(std::weak_ptr<GameObject> shooter);
 
     std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
 
@@ -47,8 +47,8 @@ protected:
 
     std::shared_ptr<sf::Sound> m_shootSound;
     std::shared_ptr<sf::Sound> m_blastSound;
-    std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet;
-    std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBlastBullet;
+    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet;
+    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBullet;
 
 private:
     void loadWalls();

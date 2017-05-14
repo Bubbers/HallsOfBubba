@@ -3,12 +3,17 @@
 #include <ResourceManager.h>
 #include "EnemyComponent.h"
 
-EnemyComponent::EnemyComponent(std::function<void(GameObject*, std::shared_ptr<Texture>)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
+EnemyComponent::EnemyComponent(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
         bulletSpawner(bulletSpawner), playerObject(playerObject){
 
 }
 
 void EnemyComponent::update(float dt) {
+    if (owner.expired()) {
+        return;
+    }
+    std::shared_ptr<GameObject> owner_ptr = owner.lock();
+
     float randNum = float(rand()) / RAND_MAX;
     if(randNum < 1.0f/120.0f){ // one bullet every other second (on average)
         bulletSpawner(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png"));
@@ -16,8 +21,8 @@ void EnemyComponent::update(float dt) {
 
     orientEnemyTowardsPlayer();
 
-    chag::float3 prevLocation = owner->getRelativeLocation();
-    locationAtLastUpdate = owner->getRelativeLocation();
+    chag::float3 prevLocation = owner_ptr->getRelativeLocation();
+    locationAtLastUpdate = owner_ptr->getRelativeLocation();
 
     if(rand() % 60 == 0) {
 
@@ -38,11 +43,16 @@ void EnemyComponent::update(float dt) {
 
     prevLocation.x += previousXSpeed / 30.0f * dt * 3.0f;
     prevLocation.z += previousYSpeed / 30.0f * dt * 3.0f;
-    owner->setLocation(prevLocation);
+    owner_ptr->setLocation(prevLocation);
 }
 
 void EnemyComponent::orientEnemyTowardsPlayer() const {
-    chag::float3 vectorBetweenEnemyAndPlayer = chag::normalize(playerObject->getAbsoluteLocation() - owner->getAbsoluteLocation());
+    if (owner.expired()) {
+        return;
+    }
+    std::shared_ptr<GameObject> owner_ptr = owner.lock();
+
+    chag::float3 vectorBetweenEnemyAndPlayer = chag::normalize(playerObject->getAbsoluteLocation() - owner_ptr->getAbsoluteLocation());
 
     chag::float3 defaultDir = chag::make_vector(0.0f, 0.0f, 1.0f);
     float angle = acos(dot(defaultDir, vectorBetweenEnemyAndPlayer));
@@ -50,15 +60,22 @@ void EnemyComponent::orientEnemyTowardsPlayer() const {
         angle = -angle ;
     }
 
-    owner->setRotation(make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
+    owner_ptr->setRotation(make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
 }
 
 void EnemyComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
-    owner->setLocation(locationAtLastUpdate);
+    if (owner.expired()) {
+        return;
+    }
+
+    owner.lock()->setLocation(locationAtLastUpdate);
     previousXSpeed = 0;
 }
 
 void EnemyComponent::duringCollision(std::shared_ptr<GameObject> collider) {
-    owner->setLocation(locationAtLastUpdate);
+    if (owner.expired()) {
+        return;
+    }
+    owner.lock()->setLocation(locationAtLastUpdate);
     previousXSpeed = 0;
 }

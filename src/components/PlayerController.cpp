@@ -13,7 +13,9 @@
 #include "Camera.h"
 
 
-PlayerController::PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc, Camera *camera, std::shared_ptr<PointLight> light) :
+PlayerController::PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
+                                   std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc,
+                                   Camera *camera, std::shared_ptr<PointLight> light) :
         spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light){
 
 }
@@ -63,18 +65,24 @@ chag::SmallVector3<float> PlayerController::getMouseRayInWorldSpace(float mouseX
 }
 
 void PlayerController::update(float dt) {
+    if (owner.expired()) {
+        return;
+    }
+
+    std::shared_ptr<GameObject> owner_ptr = owner.lock();
+
     ControlsManager* cm = ControlsManager::getInstance();
     ControlStatus horizontalStatus = cm->getStatus(MOVE_HORIZONTAL);
     ControlStatus verticalStatus = cm->getStatus(MOVE_VERTICAL);
-    chag::float3 prevLocation = owner->getRelativeLocation();
-    locationAtLastUpdate = owner->getRelativeLocation();
+    chag::float3 prevLocation = owner_ptr->getRelativeLocation();
+    locationAtLastUpdate = owner_ptr->getRelativeLocation();
     if(horizontalStatus.isActive()){
         prevLocation.x += horizontalStatus.getValue() / 30.0f * dt * 3.0f;
     }
     if(verticalStatus.isActive()){
         prevLocation.z += verticalStatus.getValue() / 30.0f * dt * 3.0f;
     }
-    owner->setLocation(prevLocation);
+    owner_ptr->setLocation(prevLocation);
 
     timeSinceLastShotAttackLMB += dt;
     if(timeSinceLastShotAttackLMB > 1.0f) {
@@ -90,7 +98,7 @@ void PlayerController::update(float dt) {
         ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_RMB);
         if (shootButton.isActive()) {
             for (int i = 0; i < 8; ++i) {
-                owner->setRotation(owner->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
+                owner_ptr->setRotation(owner_ptr->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
                 spawnBlastBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
             }
             timeSinceLastShotAttackRMB = 0.0f;
@@ -99,7 +107,7 @@ void PlayerController::update(float dt) {
 
     auto targetLookAt = getPlaneIntersectionPoint();
 
-    chag::float3 vectorBetweenMouseAndPlayer = chag::normalize(targetLookAt - owner->getAbsoluteLocation());
+    chag::float3 vectorBetweenMouseAndPlayer = chag::normalize(targetLookAt - owner_ptr->getAbsoluteLocation());
 
     chag::float3 defaultDir = chag::make_vector(0.0f, 0.0f, 1.0f);
     float angle = (float)acos(chag::dot(defaultDir, vectorBetweenMouseAndPlayer));
@@ -107,14 +115,22 @@ void PlayerController::update(float dt) {
         angle = -angle ;
     }
 
-    owner->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
-    light->position = owner->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f);
+    owner_ptr->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
+    light->position = owner_ptr->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f);
 }
 
 void PlayerController::beforeCollision(std::shared_ptr<GameObject> collider) {
-    owner->setLocation(locationAtLastUpdate);
+    if (owner.expired()) {
+        return;
+    }
+    std::shared_ptr<GameObject> owner_ptr = owner.lock();
+    owner_ptr->setLocation(locationAtLastUpdate);
 }
 
 void PlayerController::duringCollision(std::shared_ptr<GameObject> collider) {
-    owner->setLocation(locationAtLastUpdate);
+    if (owner.expired()) {
+        return;
+    }
+    std::shared_ptr<GameObject> owner_ptr = owner.lock();
+    owner_ptr->setLocation(locationAtLastUpdate);
 }

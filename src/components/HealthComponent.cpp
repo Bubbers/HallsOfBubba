@@ -15,6 +15,10 @@ void HealthComponent::update(float dt) {
 }
 
 void HealthComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
+    if(owner.expired()) {
+        return;
+    }
+
     if(collider->getIdentifier() & 1){
         health--;
         for (auto listener : damageListeners) {
@@ -24,7 +28,7 @@ void HealthComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
     }
     if(health <= 0){
         m_deathSound->play();
-        owner->makeDirty();
+        owner.lock()->makeDirty();
     }
 }
 

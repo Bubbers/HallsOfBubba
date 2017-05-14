@@ -12,7 +12,10 @@
 class PlayerController : public IComponent {
 
 public:
-    PlayerController(std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc, std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc, Camera *camera, std::shared_ptr<PointLight> light);
+    PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
+                     std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc,
+                     Camera *camera,
+                     std::shared_ptr<PointLight> light);
     chag::float3 getPlaneIntersectionPoint();
 
     virtual void update(float dt) override;
@@ -22,8 +25,8 @@ public:
     void duringCollision(std::shared_ptr<GameObject> collider) override;
 
 private:
-    std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBulletFunc;
-    std::function<void(GameObject*, std::shared_ptr<Texture>)> spawnBlastBulletFunc;
+    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc;
+    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc;
     Camera *camera;
     float timeSinceLastShotAttackLMB = 1.0f;
     float timeSinceLastShotAttackRMB = 1.0f;

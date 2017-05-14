@@ -83,7 +83,7 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
     m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
     m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
 
-    spawnBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
+    spawnBullet = [this, camera](std::weak_ptr<GameObject> shooter, std::shared_ptr<Texture> particleTexture) mutable {
         auto bulletObject = generateBulletBase(shooter);
 
         std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
@@ -101,7 +101,7 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
         m_shootSound->play();
     };
 
-    spawnBlastBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
+    spawnBlastBullet = [this, camera](std::weak_ptr<GameObject> shooter, std::shared_ptr<Texture> particleTexture) mutable {
         auto bulletObject = generateBulletBase(shooter);
 
         std::shared_ptr<ParticleRenderer> particleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
@@ -119,11 +119,13 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
     };
 }
 
-std::shared_ptr<GameObject> Room::generateBulletBase(GameObject* shooter) {
-    if(shooter == nullptr) {
+std::shared_ptr<GameObject> Room::generateBulletBase(std::weak_ptr<GameObject> shooter) {
+    if(shooter.expired()) {
         return std::shared_ptr<GameObject>();
     }
-    chag::float4x4 rotationMatrix = chag::makematrix(shooter->getAbsoluteRotation());
+    std::shared_ptr<GameObject> shooter_ptr = shooter.lock();
+
+    chag::float4x4 rotationMatrix = chag::makematrix(shooter_ptr->getAbsoluteRotation());
     chag::float4 startDirection = chag::make_vector(0.0f, 0.0f, 1.0f, 0.0f);
     chag::float3 direction = chag::make_vector3(rotationMatrix * startDirection);
 
@@ -133,8 +135,8 @@ std::shared_ptr<GameObject> Room::generateBulletBase(GameObject* shooter) {
     auto bulletMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bullet.obj");
 
     auto bulletObject = std::make_shared<GameObject>(bulletMesh);
-    bulletObject->setLocation(shooter->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f));
-    bulletObject->setRotation(shooter->getAbsoluteRotation());
+    bulletObject->setLocation(shooter_ptr->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f));
+    bulletObject->setRotation(shooter_ptr->getAbsoluteRotation());
     bulletObject->setScale(chag::make_vector(3.0f,3.0f,3.0f));
     bulletObject->addComponent(new TimedLife(20.0f));
     bulletObject->addComponent(new MoveComponent(
@@ -145,7 +147,7 @@ std::shared_ptr<GameObject> Room::generateBulletBase(GameObject* shooter) {
     ));
 
     int shootId = 0;
-    if (shooter->getIdentifier() == PLAYER_IDENTIFIER) {
+    if (shooter_ptr->getIdentifier() == PLAYER_IDENTIFIER) {
         shootId = PLAYER_SPAWNED_BULLET;
         bulletObject->addCollidesWith(ENEMY_IDENTIFIER);
     } else {

@@ -59,7 +59,7 @@ void BossRoom::createBoss() {
     m_scene->addShadowCaster(bossObject);
 }
 
-std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet,
+std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet,
                                                         std::shared_ptr<GameObject> playerObject,
                                                         HudRenderer *hudRenderer,
                                                         chag::float3 location)

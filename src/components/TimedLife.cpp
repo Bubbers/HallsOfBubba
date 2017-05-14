@@ -7,8 +7,12 @@ TimedLife::~TimedLife() {
 }
 
 void TimedLife::update(float dt) {
-     lifeTime -= dt;
-     if (lifeTime <= 0) {
-         owner->makeDirty(); 
-     }
+    if (owner.expired()) {
+        return;
+    }
+
+    lifeTime -= dt;
+    if (lifeTime <= 0) {
+        owner.lock()->makeDirty();
+    }
 }
