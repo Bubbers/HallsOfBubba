@@ -4,7 +4,7 @@
 
 #include <IComponent.h>
 #include <Scene.h>
-#include <AudioManager.h>
+//#include <AudioManager.h>
 
 class ChangeRoomOnCollision: public IComponent {
 public:
@@ -15,7 +15,7 @@ public:
 private:
     std::shared_ptr<Scene> scene;
 
-    std::shared_ptr<sf::Sound> m_sound;
+  //  std::shared_ptr<sf::Sound> m_sound;
 
     std::function<void(void)> onCollision;
 };

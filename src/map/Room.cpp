@@ -21,6 +21,7 @@
 #include <components/BossController.h>
 #include "Room.h"
 #include "HallwayRoom.h"
+#include <glutil/glutil.h>
 
 void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent *playerHealth, Direction enteredDirection) {
 
@@ -71,7 +72,7 @@ void Room::loadWalls() {
         wallGob->setScale(chag::make_vector(30.0f, 4.0f, 1.0f));
 
         wallGob->setLocation(wallPos[rotMult]);
-        auto rotationQuat = chag::make_quaternion_axis_angle(upVect, M_PI_2 * rotMult);
+        auto rotationQuat = chag::make_quaternion_axis_angle(upVect, 2 * M_PI * rotMult);
         wallGob->setRotation(rotationQuat);
 
         wallGob->setIdentifier(WALL_IDENTIFIER);
@@ -80,8 +81,8 @@ void Room::loadWalls() {
 }
 
 void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
-    m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
-    m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
+//    m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
+ //   m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
 
     spawnBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
         auto bulletObject = generateBulletBase(shooter);
@@ -98,7 +99,7 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
 
 
         m_scene->addShadowCaster(bulletObject);
-        m_shootSound->play();
+       // m_shootSound->play();
     };
 
     spawnBlastBullet = [this, camera](GameObject* shooter, std::shared_ptr<Texture> particleTexture) mutable {
@@ -115,7 +116,7 @@ void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
         particleGenerator->initializeModelMatrix();
 
         m_scene->addShadowCaster(bulletObject);
-        m_blastSound->play();
+       // m_blastSound->play();
     };
 }
 

@@ -5,8 +5,8 @@
 #include "HealthComponent.h"
 
 HealthComponent::HealthComponent(int maxHealth) : maxHealth(maxHealth), health(maxHealth) {
-    m_deathSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/death.wav"));
-    m_hurtSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/hurt.wav"));
+//    m_deathSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/death.wav"));
+ //   m_hurtSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/hurt.wav"));
 
 }
 
@@ -20,10 +20,10 @@ void HealthComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
         for (auto listener : damageListeners) {
             listener(1);
         }
-        m_hurtSound->play();
+      //  m_hurtSound->play();
     }
     if(health <= 0){
-        m_deathSound->play();
+      //  m_deathSound->play();
         owner->makeDirty();
     }
 }

@@ -7,7 +7,7 @@
 
 
 #include <IComponent.h>
-#include <AudioManager.h>
+//#include <AudioManager.h>
 
 class HealthComponent : public IComponent {
 
@@ -26,8 +26,8 @@ private:
     int maxHealth;
     std::vector<std::function<void(int)>> damageListeners;
 
-    std::shared_ptr<sf::Sound> m_deathSound;
-    std::shared_ptr<sf::Sound> m_hurtSound;
+   // std::shared_ptr<sf::Sound> m_deathSound;
+    //std::shared_ptr<sf::Sound> m_hurtSound;
 };
 
 

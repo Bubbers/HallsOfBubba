@@ -45,8 +45,8 @@ protected:
 
     HudRenderer* hudRenderer;
 
-    std::shared_ptr<sf::Sound> m_shootSound;
-    std::shared_ptr<sf::Sound> m_blastSound;
+    //std::shared_ptr<sf::Sound> m_shootSound;
+    //std::shared_ptr<sf::Sound> m_blastSound;
     std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBullet;
     std::function<void(GameObject *, std::shared_ptr<Texture>)> spawnBlastBullet;
 

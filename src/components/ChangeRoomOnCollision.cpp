@@ -3,7 +3,7 @@
 
 ChangeRoomOnCollision::ChangeRoomOnCollision(std::shared_ptr<Scene> scene, std::function<void(void)> onCollision)
         :scene(scene), onCollision(onCollision) {
-     m_sound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/win.wav"));
+//     m_sound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/win.wav"));
 }
 
 void ChangeRoomOnCollision::beforeCollision(std::shared_ptr<GameObject> collider) {
@@ -14,7 +14,7 @@ void ChangeRoomOnCollision::beforeCollision(std::shared_ptr<GameObject> collider
         }
     }
     if(collider->getIdentifier() == PLAYER_IDENTIFIER && numEnemies == 0) {
-        m_sound->play();
+//        m_sound->play();
         onCollision();
     }
 }
