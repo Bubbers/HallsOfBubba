@@ -15,7 +15,7 @@ public:
     HealthComponent(int maxHealth);
 
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
-    virtual void update(float dt);
+    virtual void update(float dt) override;
     void addDamageListener(std::function<void(int)> damageListener);
 
     int getMaxHealth();

@@ -15,7 +15,7 @@ public:
 
     BossController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
 
-    virtual void update(float dt);
+    virtual void update(float dt) override;
 
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
     virtual void duringCollision(std::shared_ptr<GameObject> collider) override;

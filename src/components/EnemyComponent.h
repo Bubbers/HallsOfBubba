@@ -13,7 +13,7 @@ class EnemyComponent : public IComponent {
 
 public:
     EnemyComponent(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner,  std::shared_ptr<GameObject> playerObject);
-    virtual void update(float dt);
+    virtual void update(float dt) override;
 
     virtual void beforeCollision(std::shared_ptr<GameObject> collider) override;
 
