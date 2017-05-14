@@ -1,4 +1,5 @@
 #include "components/TimedLife.h"
+#include "GameObject.h"
 
 TimedLife::TimedLife(float lifeTime) : lifeTime(lifeTime) {
 }

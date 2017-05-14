@@ -1,4 +1,5 @@
 #include <ObjectIdentifiers.h>
+#include "GameObject.h"
 #include "DirtyBulletOnCollision.h"
 
 void DirtyBulletOnCollision::update(float dt) {

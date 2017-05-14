@@ -2,6 +2,7 @@
 #include <Texture.h>
 #include <ResourceManager.h>
 #include "EnemyComponent.h"
+#include "GameObject.h"
 
 EnemyComponent::EnemyComponent(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
         bulletSpawner(bulletSpawner), playerObject(playerObject){

@@ -3,6 +3,7 @@
 //
 
 #include "HealthComponent.h"
+#include "GameObject.h"
 
 HealthComponent::HealthComponent(int maxHealth) : maxHealth(maxHealth), health(maxHealth) {
     m_deathSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/death.wav"));

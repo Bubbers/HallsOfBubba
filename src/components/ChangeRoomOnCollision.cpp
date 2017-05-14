@@ -1,5 +1,6 @@
 #include <ObjectIdentifiers.h>
 #include "ChangeRoomOnCollision.h"
+#include "GameObject.h"
 
 ChangeRoomOnCollision::ChangeRoomOnCollision(std::shared_ptr<Scene> scene, std::function<void(void)> onCollision)
         :scene(scene), onCollision(onCollision) {

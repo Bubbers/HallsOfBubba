@@ -6,6 +6,7 @@
 #include <ui/HealthBar.h>
 #include <components/BossDeathWin.h>
 #include "BossRoom.h"
+#include "GameObject.h"
 
 BossRoom::BossRoom() {}
 
