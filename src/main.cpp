@@ -1,5 +1,4 @@
 
-#include <constants.h>
 #include <Window.h>
 #include <Logger.h>
 #include <StdOutLogHandler.h>
@@ -8,11 +7,7 @@
 #include <MouseButton.h>
 #include <Renderer.h>
 #include <map/RoomGraph.h>
-#include <components/HealthComponent.h>
-#include "cameras/TopDownCamera.h"
-#include "map/HallwayRoom.h"
 #include "controls.h"
-#include "ObjectIdentifiers.h"
 
 Renderer renderer;
 std::shared_ptr<Room> room;
