@@ -8,6 +8,7 @@
 
 #include <MoveComponent.h>
 #include <ObjectIdentifiers.h>
+#include <functional>
 
 class PlayerController : public IComponent {
 

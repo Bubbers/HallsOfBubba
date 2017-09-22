@@ -5,6 +5,7 @@
 #include <IComponent.h>
 #include <Scene.h>
 #include <AudioManager.h>
+#include <functional>
 
 class ChangeRoomOnCollision: public IComponent {
 public:

@@ -8,6 +8,7 @@
 
 #include <IComponent.h>
 #include <AudioManager.h>
+#include <functional>
 
 class HealthComponent : public IComponent {
 

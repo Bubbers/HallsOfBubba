@@ -9,6 +9,7 @@
 #include <IComponent.h>
 #include <ObjectIdentifiers.h>
 #include <linmath/float3.h>
+#include <functional>
 
 class EnemyComponent : public IComponent {
 
