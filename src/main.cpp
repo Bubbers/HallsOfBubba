@@ -11,6 +11,7 @@
 #include <JoystickButton.h>
 #include <JoystickTranslator.h>
 #include <ResourceManager.h>
+#include <statemachine/StateMachine.h>
 #include "controls.h"
 
 Renderer renderer;
@@ -59,6 +60,17 @@ void walk(Direction direction){
 
 int main() {
     srand(time(NULL));
+
+    const StateKey INACTIVE = 0;
+    const StateKey ACTIVE = 1;
+
+    StateMachine statemachine({INACTIVE, ACTIVE});
+
+    statemachine.connect(INACTIVE, ACTIVE, []() {
+        Logger::logDebug("New game");
+    });
+
+    statemachine.transitionToState(ACTIVE);
 
     Logger::addLogHandler(new StdOutLogHandler());
     Logger::setLogLevel(LogLevel::INFO);
