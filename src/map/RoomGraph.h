@@ -9,6 +9,9 @@
 #include <map/Direction.h>
 #include "Room.h"
 
+#define GRAPH_WIDTH 7
+#define GRAPH_HEIGHT 7
+
 class RoomGraph  {
 
 public:
@@ -26,7 +29,7 @@ private:
     int currentX = 0;
     int currentY = 0;
     std::map<Direction, std::weak_ptr<RoomGraph>> paths;
-    std::shared_ptr<Room> graph[7][7] = {{},{},{},{},{},{},{}};
+    std::shared_ptr<Room> graph[GRAPH_WIDTH][GRAPH_HEIGHT] = {{},{},{},{},{},{},{}};
 
     std::pair<int, int> getNextFromDir(Direction direction);
 
