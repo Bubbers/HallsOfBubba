@@ -38,4 +38,6 @@ private:
                       unsigned int level);
 
     void generateDoors(std::function<void(Direction)> walkCallback, unsigned int level);
+
+    level_pos_t randomLevelPos();
 };

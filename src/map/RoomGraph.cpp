@@ -15,6 +15,16 @@ std::shared_ptr<Room> RoomGraph::getCurrentRoom()
 
 void RoomGraph::walk(Direction direction)
 {
+    if (direction == NEXT_LEVEL) {
+        if (currentLevel < GRAPH_LEVELS) {
+            currentX = 3;
+            currentY = 0;
+            currentLevel++;
+        } else {
+            // TODO call win transition
+        }
+    }
+
     level_pos_t next = getNextFromDir(direction);
     if (!graph[next.first][next.second][currentLevel]) {
         throw "Tried to get a room that didn't exist";
@@ -32,6 +42,7 @@ level_pos_t RoomGraph::getNextFromDir(Direction direction)
         case LEFT:  nextX = -1; break;
         case UP:    nextY =  1; break;
         case DOWN:  nextY = -1; break;
+        default:    break;
     }
     return level_pos_t(currentX + nextX, currentY + nextY);
 };
@@ -42,27 +53,30 @@ void RoomGraph::generateGraph(
 {
     auto startRoom = level_pos_t(3, 0);
 
-    int bossRoomX = rand() % GRAPH_WIDTH;
-    int bossRoomY = rand() % GRAPH_HEIGHT;
-    auto bossRoom = level_pos_t(bossRoomX, bossRoomY);
-
-    int treasureRoomX = rand() % GRAPH_WIDTH;
-    int treasureRoomY = rand() % GRAPH_HEIGHT;
-
-    auto treasureRoom = level_pos_t(treasureRoomX, treasureRoomY);
-
-    graph[bossRoom.first][bossRoom.second][currentLevel] =
-            std::make_shared<BossRoom>(allPlayersDead);
 
     for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
-        generatePath(startRoom, treasureRoom, allPlayersDead, level);
-        generatePath(startRoom, bossRoom, allPlayersDead, level);
+        auto bossRoomPos = randomLevelPos();
+        auto treasureRoomPos = randomLevelPos();
+
+        // TODO Make the boss rooms have different bosses
+        auto bossRoom = std::make_shared<BossRoom>(allPlayersDead);
+        bossRoom->addDoor(NEXT_LEVEL, walkCallback);
+        graph[bossRoomPos.first][bossRoomPos.second][currentLevel] = bossRoom;
+
+        generatePath(startRoom, treasureRoomPos, allPlayersDead, level);
+        generatePath(startRoom, bossRoomPos, allPlayersDead, level);
         generateDoors(walkCallback, level);
     }
 
     currentX = startRoom.first;
     currentY = startRoom.second;
     currentLevel = 0;
+}
+
+level_pos_t RoomGraph::randomLevelPos()
+{
+    return level_pos_t(rand() % GRAPH_WIDTH,
+                       rand() % GRAPH_HEIGHT);
 }
 
 void RoomGraph::generatePath(level_pos_t startRoom,
