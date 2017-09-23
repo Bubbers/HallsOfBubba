@@ -12,12 +12,13 @@
 #include <JoystickTranslator.h>
 #include <ResourceManager.h>
 #include <statemachine/StateMachine.h>
+#include <actors/Player.h>
 #include "controls.h"
 
 Renderer renderer;
 std::shared_ptr<Room> room;
 std::shared_ptr<RoomGraph> roomGraph;
-std::vector<std::shared_ptr<HealthComponent>> playerHealths;
+std::vector<std::shared_ptr<Player>> players;
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -55,7 +56,7 @@ void createKeyListeners() {
 void walk(Direction direction){
     roomGraph->walk(direction);
     room = roomGraph->getCurrentRoom();
-    room->load(camera, playerHealths, direction);
+    room->load(camera, players, direction);
 }
 
 int main() {
@@ -89,11 +90,12 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    playerHealths.push_back(std::make_shared<HealthComponent>(2));
-    playerHealths.push_back(std::make_shared<HealthComponent>(2));
+    ControlStatus::Activator activator = (ControlStatus::Activator)(ControlStatus::Activator::KEYBOARD | ControlStatus::Activator::MOUSE);
+    players.push_back(std::make_shared<Player>(activator));
+    players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
     roomGraph = std::make_shared<RoomGraph>(walk);
     room = roomGraph->getCurrentRoom();
-    room->load(camera, playerHealths, Direction::UP);
+    room->load(camera, players, Direction::UP);
 
     createKeyListeners();
 

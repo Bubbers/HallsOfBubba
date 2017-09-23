@@ -15,8 +15,8 @@
 
 PlayerController::PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
                                    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc,
-                                   Camera *camera, std::shared_ptr<PointLight> light) :
-        spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light){
+                                   Camera *camera, std::shared_ptr<PointLight> light, ControlStatus::Activator activator) :
+        spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light), activator(activator){
 
 }
 
@@ -54,18 +54,21 @@ chag::float3 PlayerController::getPlaneIntersectionPoint() {
 void PlayerController::updateVirtualMousePositionBasedOnJoystick(int width, int height) {
     ControlsManager *controlsManager = ControlsManager::getInstance();
     ControlStatus horizontalAimStatus = controlsManager->getStatus(AIM_HORIZONTAL);
-    if(horizontalAimStatus.isActive()) {
-        virtualMousePosition.first += horizontalAimStatus.getValue() * 0.25;
+    if(horizontalAimStatus.isActive(activator)) {
+        virtualMousePosition.first += horizontalAimStatus.getValue(activator) * 0.25;
         virtualMousePosition.first = clip(0.0f, virtualMousePosition.first, (float)width);
     }
     ControlStatus verticalAimStatus = controlsManager->getStatus(AIM_VERTICAL);
-    if(verticalAimStatus.isActive()) {
-        virtualMousePosition.second += verticalAimStatus.getValue() * 0.25;
+    if(verticalAimStatus.isActive(activator)) {
+        virtualMousePosition.second += verticalAimStatus.getValue(activator) * 0.25;
         virtualMousePosition.second = clip(0.0f, virtualMousePosition.second, (float)height);
     }
 }
 
 bool PlayerController::checkMouseMovedAndUpdatePrevPosition() {
+    if(!(activator & ControlStatus::Activator::MOUSE)) {
+        return false;
+    }
     MousePosition mousePosition;
     int mouseX = mousePosition.getWindowX();
     int mouseY = mousePosition.getWindowY();
@@ -104,18 +107,18 @@ void PlayerController::update(float dt) {
     ControlStatus verticalStatus = cm->getStatus(MOVE_VERTICAL);
     chag::float3 prevLocation = owner_ptr->getRelativeLocation();
     locationAtLastUpdate = owner_ptr->getRelativeLocation();
-    if(horizontalStatus.isActive()){
-        prevLocation.x += horizontalStatus.getValue() / 30.0f * dt * 3.0f;
+    if(horizontalStatus.isActive(activator)){
+        prevLocation.x += horizontalStatus.getValue(activator) / 30.0f * dt * 3.0f;
     }
-    if(verticalStatus.isActive()){
-        prevLocation.z += verticalStatus.getValue() / 30.0f * dt * 3.0f;
+    if(verticalStatus.isActive(activator)){
+        prevLocation.z += verticalStatus.getValue(activator) / 30.0f * dt * 3.0f;
     }
     owner_ptr->setLocation(prevLocation);
 
     timeSinceLastShotAttackLMB += dt;
     if(timeSinceLastShotAttackLMB > 1.0f) {
         ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_LMB);
-        if (shootButton.isActive()) {
+        if (shootButton.isActive(activator)) {
             spawnBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png"));
             timeSinceLastShotAttackLMB = 0.0f;
         }
@@ -124,7 +127,7 @@ void PlayerController::update(float dt) {
     timeSinceLastShotAttackRMB += dt;
     if(timeSinceLastShotAttackRMB > 5.0f) {
         ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_RMB);
-        if (shootButton.isActive()) {
+        if (shootButton.isActive(activator)) {
             for (int i = 0; i < 8; ++i) {
                 owner_ptr->setRotation(owner_ptr->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
                 spawnBlastBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
