@@ -2,7 +2,7 @@
 
 #include <stack>
 #include <map>
-#include "State.h"
+#include "StateNode.h"
 #include <memory>
 #include <vector>
 
@@ -64,7 +64,7 @@ private:
 
     void addState(StateKey stateKey);
 
-    std::map<StateKey, std::shared_ptr<State>> state_map;
+    std::map<StateKey, std::shared_ptr<StateNode>> state_map;
 
     StateKey currentStateKey;
     StateKey prevStateKey;

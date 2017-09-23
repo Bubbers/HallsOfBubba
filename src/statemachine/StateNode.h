@@ -6,12 +6,12 @@
 typedef int StateKey;
 typedef std::function<void()> transition_callback_t;
 
-class State {
+class StateNode {
 
 
 public:
-    State(StateKey id);
-    ~State();
+    StateNode(StateKey id);
+    ~StateNode();
 
     const StateKey id;
 
