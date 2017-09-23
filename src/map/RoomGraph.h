@@ -9,6 +9,7 @@
 #define GRAPH_LEVELS 3
 
 typedef std::pair<unsigned int, unsigned int> level_pos_t;
+typedef std::function<void()> win_callback_t;
 
 class RoomGraph  {
 
@@ -19,7 +20,7 @@ public:
     ~RoomGraph();
 
     std::shared_ptr<Room> getCurrentRoom();
-    void walk(Direction direction);
+    void walk(Direction direction, win_callback_t winCallback);
 
 private:
 
