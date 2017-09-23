@@ -3,9 +3,11 @@
 #include <ResourceManager.h>
 #include "EnemyComponent.h"
 #include "GameObject.h"
+#include "Utils.h"
 
-EnemyComponent::EnemyComponent(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner, std::shared_ptr<GameObject> playerObject) :
-        bulletSpawner(bulletSpawner), playerObject(playerObject){
+EnemyComponent::EnemyComponent(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner,
+                               std::vector<std::shared_ptr<GameObject>> playerObjects) :
+        bulletSpawner(bulletSpawner), playerObjects(playerObjects), currentTarget(randomPlayer(playerObjects)){
 
 }
 
@@ -16,6 +18,11 @@ void EnemyComponent::update(float dt) {
     std::shared_ptr<GameObject> owner_ptr = owner.lock();
 
     float randNum = float(rand()) / RAND_MAX;
+    if (randNum < 1.0f/300.0f) { // change target every 5 seconds (on average)
+        currentTarget = randomPlayer(playerObjects);
+    }
+
+    randNum = float(rand()) / RAND_MAX;
     if(randNum < 1.0f/120.0f){ // one bullet every other second (on average)
         bulletSpawner(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/fire.png"));
     }
@@ -53,7 +60,7 @@ void EnemyComponent::orientEnemyTowardsPlayer() const {
     }
     std::shared_ptr<GameObject> owner_ptr = owner.lock();
 
-    chag::float3 vectorBetweenEnemyAndPlayer = chag::normalize(playerObject->getAbsoluteLocation() - owner_ptr->getAbsoluteLocation());
+    chag::float3 vectorBetweenEnemyAndPlayer = chag::normalize(currentTarget->getAbsoluteLocation() - owner_ptr->getAbsoluteLocation());
 
     chag::float3 defaultDir = chag::make_vector(0.0f, 0.0f, 1.0f);
     float angle = acos(dot(defaultDir, vectorBetweenEnemyAndPlayer));
@@ -79,4 +86,9 @@ void EnemyComponent::duringCollision(std::shared_ptr<GameObject> collider) {
     }
     owner.lock()->setLocation(locationAtLastUpdate);
     previousXSpeed = 0;
+}
+
+std::shared_ptr<GameObject> EnemyComponent::randomPlayer(std::vector<std::shared_ptr<GameObject>> playerObjects) {
+    long elem = (long) (((float) rand() / (float) RAND_MAX) * playerObjects.size());
+    return playerObjects[elem];
 }

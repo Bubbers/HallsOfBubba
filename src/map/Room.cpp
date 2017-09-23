@@ -22,7 +22,7 @@
 #include "Room.h"
 #include "HallwayRoom.h"
 
-void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent *playerHealth, Direction enteredDirection) {
+void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<HealthComponent>> playerHealths, Direction enteredDirection) {
 
     if (isLoaded) {
         return;
@@ -40,7 +40,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, HealthComponent *playerHe
     loadDoors();
     loadDirectionalLight();
     loadLights();
-    loadPlayer(playerHealth, enteredDirection);
+    loadPlayer(playerHealths, enteredDirection);
     loadGameObjects();
 }
 
@@ -250,46 +250,58 @@ void Room::display(Renderer &renderer, std::shared_ptr<Camera> camera, float tim
     renderer.drawScene(camera.get(), m_scene.get(), timeSinceStart);
 }
 
-void Room::loadPlayer(HealthComponent *playerHealth, Direction enteredDirection) {
+void Room::loadPlayer(std::vector<std::shared_ptr<HealthComponent>> playerHealths, Direction enteredDirection) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
-    auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_animated.fbx");
+    auto playerMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba.obj");
     auto playerCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
 
-    std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
-    pointLight->diffuseColor= chag::make_vector(0.50f,0.50f,0.20f);
-    pointLight->specularColor= chag::make_vector(0.00f,0.00f,0.00f);
-    pointLight->ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
-    pointLight->position = chag::make_vector(0.0f, 2.0f, 0.0f);
-    Attenuation att;
+    float i = 0;
 
-    att.linear = 5;
-    pointLight->attenuation = att;
-    m_scene->pointLights.push_back(pointLight);
+    for (auto playerHealth : playerHealths) {
 
-    playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
-    playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight));
+        if (playerHealth->getHealth() > 0) {
 
-    allAlive.push_back(playerHealth);
-    playerObject->addComponent(playerHealth);
-    if(enteredDirection == Direction::UP) {
-        playerObject->setLocation(chag::make_vector(0.0f, 0.0f, -8.0f));
-    } else if(enteredDirection == Direction::DOWN) {
-        playerObject->setLocation(chag::make_vector(0.0f, 0.0f, 8.0f));
-    } else if(enteredDirection == Direction::LEFT) {
-        playerObject->setLocation(chag::make_vector(-8.0f, 0.0f, 0.0f));
-    } else if(enteredDirection == Direction::RIGHT) {
-        playerObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
+            std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
+            pointLight->diffuseColor= chag::make_vector(0.50f,0.50f,0.20f);
+            pointLight->specularColor= chag::make_vector(0.00f,0.00f,0.00f);
+            pointLight->ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+            pointLight->position = chag::make_vector(0.0f, 2.0f, 0.0f);
+            Attenuation att;
+
+            att.linear = 5;
+            pointLight->attenuation = att;
+            m_scene->pointLights.push_back(pointLight);
+
+            std::shared_ptr<GameObject> playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
+            playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight));
+
+            allAlive.push_back(playerHealth);
+            playerObject->addComponent(playerHealth.get());
+            if (enteredDirection == Direction::UP) {
+                playerObject->setLocation(chag::make_vector(i, 0.0f, -8.0f));
+            } else if (enteredDirection == Direction::DOWN) {
+                playerObject->setLocation(chag::make_vector(-i, 0.0f, 8.0f));
+            } else if (enteredDirection == Direction::LEFT) {
+                playerObject->setLocation(chag::make_vector(-8.0f, 0.0f, i));
+            } else if (enteredDirection == Direction::RIGHT) {
+                playerObject->setLocation(chag::make_vector(8.0f, 0.0f, -i));
+            }
+            StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
+            playerObject->addRenderComponent(stdrenderer);
+            playerObject->setDynamic(true);
+            playerObject->setIdentifier(PLAYER_IDENTIFIER);
+            playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
+            m_scene->addShadowCaster(playerObject);
+            HealthBar *playerHealthBar = new HealthBar(playerHealth);
+            hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
+            playerObjects.push_back(playerObject);
+
+            i += 4;
+        }
+
     }
-    StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
-    playerObject->addRenderComponent(stdrenderer);
-    playerObject->setDynamic(true);
-    playerObject->setIdentifier(PLAYER_IDENTIFIER);
-    playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
-    m_scene->addShadowCaster(playerObject);
-    HealthBar* playerHealthBar = new HealthBar(playerHealth);
-    hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
 }
 
 void Room::createTorch(chag::float3 location)  {

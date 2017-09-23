@@ -28,7 +28,7 @@ private:
     std::shared_ptr<GameObject> getCrateObject() const;
 
     std::shared_ptr<GameObject> getEnemyObject(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet,
-                                               std::shared_ptr<GameObject> playerObject,
+                                               std::vector<std::shared_ptr<GameObject>> playerObject,
                                                HudRenderer *hudRenderer,
                                                chag::float3 location);
 

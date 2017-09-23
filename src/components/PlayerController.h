@@ -33,8 +33,16 @@ private:
     float timeSinceLastShotAttackRMB = 1.0f;
     chag::float3 locationAtLastUpdate;
     std::shared_ptr<PointLight> light;
+    std::pair<float, float> prevMousePosition = std::pair<float, float>(-1, -1);
+    std::pair<float, float> virtualMousePosition = std::pair<float, float>(0, 0);
 
     chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
+
+    bool checkMouseMovedAndUpdatePrevPosition();
+
+    void updateVirtualMousePositionBasedOnJoystick(int width, int height);
+
+    float clip(float min, float toClip, float max);
 };
 
 

@@ -6,7 +6,7 @@
 #include "GameObject.h"
 
 BossController::BossController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> bulletSpawner,
-                               std::shared_ptr<GameObject> playerObject) : EnemyComponent(bulletSpawner, playerObject){
+                               std::vector<std::shared_ptr<GameObject>> playerObjects) : EnemyComponent(bulletSpawner, playerObjects){
 
 }
 

@@ -17,8 +17,8 @@ void BossRoom::loadGameObjects() {
     createTorch(chag::make_vector(8.0f, 0.0f, -8.0f));
     createBoss();
 
-    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObject, hudRenderer, chag::make_vector(0.0f, 0.0f, 8.0f)));
-    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObject, hudRenderer, chag::make_vector(0.0f, 0.0f, -8.0f)));
+    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(0.0f, 0.0f, 8.0f)));
+    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(0.0f, 0.0f, -8.0f)));
 }
 
 void BossRoom::createBoss() {
@@ -39,10 +39,10 @@ void BossRoom::createBoss() {
     bossShieldObject->addRenderComponent(stdShieldRenderer);
     bossObject->addChild(bossShieldObject);
 
-    HealthComponent *bossHealth = new HealthComponent(6);
-    bossObject->addComponent(new BossController(spawnBullet, playerObject));
+    std::shared_ptr<HealthComponent> bossHealth = std::make_shared<HealthComponent>(6);
+    bossObject->addComponent(new BossController(spawnBullet, playerObjects));
     allAlive.push_back(bossHealth);
-    bossObject->addComponent(bossHealth);
+    bossObject->addComponent(bossHealth.get());
     bossObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
     bossObject->setScale(chag::make_vector(1.2f, 1.2f, 1.2f));
     bossObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f,1.0f,0.0f), M_PI));
@@ -61,7 +61,7 @@ void BossRoom::createBoss() {
 }
 
 std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet,
-                                                        std::shared_ptr<GameObject> playerObject,
+                                                        std::vector<std::shared_ptr<GameObject>> playerObjects,
                                                         HudRenderer *hudRenderer,
                                                         chag::float3 location)
 {
@@ -71,11 +71,11 @@ std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::wea
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
     auto monsterCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
     auto monsterObject = std::make_shared<GameObject>(monsterMesh, monsterCollisionMesh);
-    HealthComponent *monsterHealth = new HealthComponent(2);
+    std::shared_ptr<HealthComponent> monsterHealth = std::make_shared<HealthComponent>(2);
 
-    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
+    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObjects));
     allAlive.push_back(monsterHealth);
-    monsterObject->addComponent(monsterHealth);
+    monsterObject->addComponent(monsterHealth.get());
     monsterObject->setLocation(location);
     monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
     monsterObject->initializeModelMatrix();

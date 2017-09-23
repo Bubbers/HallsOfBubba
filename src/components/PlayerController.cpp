@@ -29,13 +29,17 @@ PlayerController::PlayerController(std::function<void(std::weak_ptr<GameObject>,
  * http://antongerdelan.net/opengl/raycasting.html
  */
 chag::float3 PlayerController::getPlaneIntersectionPoint() {
-    float mouseX = (float)(new MousePosition())->getWindowX();
-    float mouseY = (float)(new MousePosition())->getWindowY();
 
     int width = Globals::get(Globals::WINDOW_WIDTH);
     int height = Globals::get(Globals::WINDOW_HEIGHT);
+    
+    if(checkMouseMovedAndUpdatePrevPosition()) {
+        virtualMousePosition = prevMousePosition;
+    } else {
+        updateVirtualMousePositionBasedOnJoystick(width, height);
+    }
 
-    auto l = getMouseRayInWorldSpace(mouseX, mouseY, width, height);
+    auto l = getMouseRayInWorldSpace(virtualMousePosition.first, virtualMousePosition.second, width, height);
 
     auto p0 = chag::make_vector(0.0f, 0.0f, 0.0f);
     auto l0 = camera->getPosition();
@@ -45,6 +49,30 @@ chag::float3 PlayerController::getPlaneIntersectionPoint() {
 
     auto intersectionPoint = d*l + l0;
     return intersectionPoint;
+}
+
+void PlayerController::updateVirtualMousePositionBasedOnJoystick(int width, int height) {
+    ControlsManager *controlsManager = ControlsManager::getInstance();
+    ControlStatus horizontalAimStatus = controlsManager->getStatus(AIM_HORIZONTAL);
+    if(horizontalAimStatus.isActive()) {
+        virtualMousePosition.first += horizontalAimStatus.getValue() * 0.25;
+        virtualMousePosition.first = clip(0.0f, virtualMousePosition.first, (float)width);
+    }
+    ControlStatus verticalAimStatus = controlsManager->getStatus(AIM_VERTICAL);
+    if(verticalAimStatus.isActive()) {
+        virtualMousePosition.second += verticalAimStatus.getValue() * 0.25;
+        virtualMousePosition.second = clip(0.0f, virtualMousePosition.second, (float)height);
+    }
+}
+
+bool PlayerController::checkMouseMovedAndUpdatePrevPosition() {
+    MousePosition mousePosition;
+    int mouseX = mousePosition.getWindowX();
+    int mouseY = mousePosition.getWindowY();
+    bool same = prevMousePosition.first == mouseX && prevMousePosition.second == mouseY;
+    prevMousePosition.first = mouseX;
+    prevMousePosition.second = mouseY;
+    return !same;
 }
 
 chag::SmallVector3<float> PlayerController::getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const {
@@ -133,4 +161,8 @@ void PlayerController::duringCollision(std::shared_ptr<GameObject> collider) {
     }
     std::shared_ptr<GameObject> owner_ptr = owner.lock();
     owner_ptr->setLocation(locationAtLastUpdate);
+}
+
+float PlayerController::clip(float min, float toClip, float max) {
+    return std::max(min, std::min(toClip, max));
 }
