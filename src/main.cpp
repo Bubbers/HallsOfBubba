@@ -10,6 +10,7 @@
 #include <JoystickAxis.h>
 #include <JoystickButton.h>
 #include <JoystickTranslator.h>
+#include <ResourceManager.h>
 #include "controls.h"
 
 Renderer renderer;
@@ -24,6 +25,7 @@ std::shared_ptr<TopDownCamera> camera;
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
     room->update(timeSinceLastCall);
+    ResourceManager::update();
 }
 
 // Called by the window mainloop
