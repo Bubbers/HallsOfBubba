@@ -8,10 +8,13 @@
 #include <Renderer.h>
 #include <actors/Player.h>
 #include "Direction.h"
+#include <vector>
 #include "HudRenderer.h"
 
 class Room {
 public:
+    Room(std::function<void()> &allPlayersDead);
+
     void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection);
     void addDoor(Direction direction, std::function<void(Direction direction)> callback);
 
@@ -31,7 +34,8 @@ protected:
 
     bool isLoaded = false;
 
-    std::vector<std::shared_ptr<HealthComponent>> allAlive;
+    std::vector<std::shared_ptr<HealthComponent>> players;
+    std::vector<std::shared_ptr<HealthComponent>> enemies;
 
     std::shared_ptr<Scene> m_scene;
     std::shared_ptr<Collider> m_collider;
@@ -61,6 +65,8 @@ private:
     void loadDirectionalLight();
 
     void loadHud(const std::shared_ptr<TopDownCamera> &camera);
+
+    std::function<void()> allPlayersDead;
 };
 
 

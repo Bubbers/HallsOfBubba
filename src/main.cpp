@@ -16,7 +16,6 @@
 #include "controls.h"
 
 Renderer renderer;
-std::shared_ptr<Room> room;
 std::shared_ptr<RoomGraph> roomGraph;
 std::vector<std::shared_ptr<Player>> players;
 
@@ -32,8 +31,8 @@ std::shared_ptr<TopDownCamera> camera;
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
     statemachine->doTransitions();
-    room->update(timeSinceLastCall);
 
+    roomGraph->getCurrentRoom()->update(timeSinceLastCall);
 #ifdef __linux__
     ResourceManager::update();
 #endif
@@ -41,7 +40,7 @@ void idle(float timeSinceStart,float timeSinceLastCall) {
 
 // Called by the window mainloop
 void display(float timeSinceStart,float timeSinceLastCall) {
-    room->display(renderer, camera, timeSinceStart, timeSinceLastCall);
+    roomGraph->getCurrentRoom()->display(renderer, camera, timeSinceStart, timeSinceLastCall);
 }
 
 // Called when the window gets resized
@@ -64,8 +63,7 @@ void createKeyListeners() {
 
 void walk(Direction direction){
     roomGraph->walk(direction);
-    room = roomGraph->getCurrentRoom();
-    room->load(camera, players, direction);
+    roomGraph->getCurrentRoom()->load(camera, players, direction);
 }
 
 int main() {
@@ -88,6 +86,11 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
+    std::function<void()> allPlayersDead = [&] () {
+        statemachine->queueTransition(INACTIVE);
+        statemachine->queueTransition(ACTIVE);
+    };
+
     statemachine->connect(INACTIVE, ACTIVE, [&]() {
         Logger::logInfo("New game");
 
@@ -96,9 +99,8 @@ int main() {
         players.push_back(std::make_shared<Player>(activator));
         players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
 
-        roomGraph = std::make_shared<RoomGraph>(walk);
-        room = roomGraph->getCurrentRoom();
-        room->load(camera, players, Direction::UP);
+        roomGraph = std::make_shared<RoomGraph>(walk, allPlayersDead);
+        roomGraph->getCurrentRoom()->load(camera, players, Direction::UP);
 
     });
 

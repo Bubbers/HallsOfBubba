@@ -20,10 +20,10 @@
 #include "HallwayRoom.h"
 
 
-HallwayRoom::HallwayRoom(bool includeObstacle) : includeObstacle(includeObstacle){
-
+HallwayRoom::HallwayRoom(std::function<void()> &allPlayersDead, bool includeObstacle)
+        : Room(allPlayersDead), includeObstacle(includeObstacle)
+{
 }
-
 
 HallwayRoom::~HallwayRoom()
 {
@@ -43,7 +43,7 @@ std::shared_ptr<GameObject> HallwayRoom::getEnemyObject(std::function<void(std::
     std::shared_ptr<HealthComponent> monsterHealth = std::make_shared<HealthComponent>(2);
 
     monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObjects));
-    allAlive.push_back(monsterHealth);
+    enemies.push_back(monsterHealth);
     monsterObject->addComponent(monsterHealth.get());
     monsterObject->setLocation(location);
     monsterObject->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
@@ -121,7 +121,6 @@ void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
         createTorch(location);
     }
 }
-
 
 
 

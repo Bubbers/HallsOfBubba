@@ -6,8 +6,8 @@
 #include "BossRoom.h"
 #include "HallwayRoom.h"
 
-RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback) {
-    generateGraph(walkCallback);
+RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback, std::function<void()> &allPlayersDead) {
+    generateGraph(walkCallback, allPlayersDead);
 }
 
 std::shared_ptr<Room> RoomGraph::getCurrentRoom(){
@@ -47,7 +47,7 @@ std::pair<int, int> RoomGraph::getNextFromDir(Direction direction){
 };
 
 
-void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
+void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback, std::function<void()> &allPlayersDead)
 {
     auto startRoom    = std::pair<int, int>(3, 0);
 
@@ -60,9 +60,9 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
 
     auto treasureRoom = std::pair<int, int>(treasureRoomX, treasureRoomY);
 
-    graph[bossRoom.first][bossRoom.second] = std::make_shared<BossRoom>();
-    generatePath(startRoom, treasureRoom);
-    generatePath(startRoom, bossRoom);
+    graph[bossRoom.first][bossRoom.second] = std::make_shared<BossRoom>(allPlayersDead);
+    generatePath(startRoom, treasureRoom, allPlayersDead);
+    generatePath(startRoom, bossRoom, allPlayersDead);
     generateDoors(walkCallback);
 
     currentX = startRoom.first;
@@ -70,7 +70,8 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback)
 }
 
 void RoomGraph::generatePath(std::pair<int, int> startRoom,
-                             std::pair<int, int> targetRoom)
+                             std::pair<int, int> targetRoom,
+                             std::function<void()> &allPlayersDead)
 {
     const int xMin = std::min(startRoom.first, targetRoom.first);
     const int xMax = std::max(startRoom.first, targetRoom.first);
@@ -83,7 +84,7 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
         int x = startRoom.first;
 
         if (!graph[x][y]) {
-            graph[x][y] = std::make_shared<HallwayRoom>(false);
+            graph[x][y] = std::make_shared<HallwayRoom>(allPlayersDead, false);
         }
     }
 
@@ -92,7 +93,7 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
         int y = targetRoom.second;
 
         if (!graph[x][y]) {
-            graph[x][y] = std::make_shared<HallwayRoom>(false);
+            graph[x][y] = std::make_shared<HallwayRoom>(allPlayersDead, false);
         }
     }
 }
@@ -116,5 +117,10 @@ void RoomGraph::generateDoors(std::function<void(Direction)> walkCallback) {
             }
         }
     }
+}
+
+RoomGraph::~RoomGraph()
+{
+
 }
 

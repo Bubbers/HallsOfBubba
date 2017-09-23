@@ -8,7 +8,9 @@
 #include "BossRoom.h"
 #include "GameObject.h"
 
-BossRoom::BossRoom() {}
+BossRoom::BossRoom(std::function<void()> &allPlayersDead): Room(allPlayersDead)
+{
+}
 
 void BossRoom::loadGameObjects() {
     createTorch(chag::make_vector(8.0f, 0.0f, 8.0f));
@@ -41,7 +43,7 @@ void BossRoom::createBoss() {
 
     std::shared_ptr<HealthComponent> bossHealth = std::make_shared<HealthComponent>(6);
     bossObject->addComponent(new BossController(spawnBullet, playerObjects));
-    allAlive.push_back(bossHealth);
+    enemies.push_back(bossHealth);
     bossObject->addComponent(bossHealth.get());
     bossObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
     bossObject->setScale(chag::make_vector(1.2f, 1.2f, 1.2f));
@@ -74,7 +76,7 @@ std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::wea
     std::shared_ptr<HealthComponent> monsterHealth = std::make_shared<HealthComponent>(2);
 
     monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObjects));
-    allAlive.push_back(monsterHealth);
+    players.push_back(monsterHealth);
     monsterObject->addComponent(monsterHealth.get());
     monsterObject->setLocation(location);
     monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
