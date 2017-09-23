@@ -31,6 +31,7 @@ const int SCREEN_HEIGHT = 480;
 std::shared_ptr<TopDownCamera> camera;
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
+    statemachine->doTransitions();
     room->update(timeSinceLastCall);
 
 #ifdef __linux__
@@ -108,7 +109,7 @@ int main() {
 
     createKeyListeners();
 
-    statemachine->transitionToState(ACTIVE);
+    statemachine->queueTransition(ACTIVE);
     win->start(60);
 
     return 0;

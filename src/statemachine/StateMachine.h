@@ -36,12 +36,12 @@ public:
      * std::invalid_argument will be thrown if there is no connection to the next state from the current state.
      * @param newStateKey The StateKey matching the next state.
      */
-    void transitionToState(StateKey newStateKey);
+    void queueTransition(StateKey newStateKey);
 
     /**
-     * Transition to the previous state. Useful in menus etc.
+     * Do all queued transitions
      */
-    void transitionToPrevState();
+    void doTransitions();
 
     /**
      * Creates a directed connection from one State to another State.
@@ -67,5 +67,8 @@ private:
     std::map<StateKey, std::shared_ptr<StateNode>> state_map;
 
     StateKey currentStateKey;
-    StateKey prevStateKey;
+
+    std::vector<StateKey> waitingTransitions;
+
+    void doTransition(StateKey newStateKey);
 };

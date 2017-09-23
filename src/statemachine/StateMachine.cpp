@@ -12,7 +12,6 @@ StateMachine::StateMachine(const std::vector<StateKey> keys)
         addState(key);
     }
 
-    prevStateKey = keys.front();
     currentStateKey = keys.front();
 }
 
@@ -20,35 +19,14 @@ StateMachine::~StateMachine()
 {
 }
 
-void StateMachine::transitionToPrevState()
-{
-    if (prevStateKey == currentStateKey) {
-        Logger::logWarning("Can not transition to previous state"
-                           " since it is the same as the current state.");
-        return;
-    }
-
-    transitionToState(prevStateKey);
-}
-
-void StateMachine::transitionToState(StateKey newStateKey)
+void StateMachine::queueTransition(StateKey newStateKey)
 {
     if (!hasState(newStateKey)) {
         throw std::invalid_argument("Trying to transition to non-existing state");
     }
 
-    auto currentState = state_map[currentStateKey];
-    auto newState = state_map[newStateKey];
-
-    if (!currentState->hasConnection(newState->id)) {
-        throw std::invalid_argument("Trying to transition to a state to which there"
-                                    " is no connection from the current state");
-    }
-
-    currentState->transition(newState->id);
-
-    prevStateKey = currentStateKey;
-    currentStateKey = newStateKey;
+    Logger::logInfo("Queueing a transition to " + std::to_string(newStateKey));
+    waitingTransitions.push_back(newStateKey);
 }
 
 void StateMachine::addState(StateKey stateKey)
@@ -80,4 +58,29 @@ void StateMachine::connect(StateKey fromKey, StateKey toKey, transition_callback
 bool StateMachine::hasState(const StateKey key) const
 {
     return state_map.count(key) > 0;
+}
+
+void StateMachine::doTransitions()
+{
+    Logger::logInfo("Waiting transitions: " + std::to_string(waitingTransitions.size()));
+    for (auto it = waitingTransitions.begin(); it < waitingTransitions.end();) {
+        auto newStateKey = *it;
+        waitingTransitions.erase(it);
+        doTransition(newStateKey);
+    }
+}
+
+void StateMachine::doTransition(StateKey newStateKey) {
+    auto currentState = state_map[currentStateKey];
+    auto newState = state_map[newStateKey];
+
+    Logger::logInfo("Current: " + std::to_string(currentStateKey) + " next: " + std::to_string(newStateKey));
+    if (!currentState->hasConnection(newState->id)) {
+        throw std::invalid_argument("Trying to transition to a state to which there"
+                                            " is no connection from the current state");
+    }
+
+    currentState->transition(newState->id);
+    currentStateKey = newStateKey;
+
 }
