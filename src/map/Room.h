@@ -11,7 +11,7 @@
 
 class Room {
 public:
-    void load(std::shared_ptr<TopDownCamera> camera, HealthComponent* player, Direction enteredDirection);
+    void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<HealthComponent>> players, Direction enteredDirection);
     void addDoor(Direction direction, std::function<void(Direction direction)> callback);
 
     void display(Renderer &renderer,
@@ -30,11 +30,11 @@ protected:
 
     bool isLoaded = false;
 
-    std::vector<HealthComponent*> allAlive;
+    std::vector<std::shared_ptr<HealthComponent>> allAlive;
 
     std::shared_ptr<Scene> m_scene;
     std::shared_ptr<Collider> m_collider;
-    std::shared_ptr<GameObject> playerObject;
+    std::vector<std::shared_ptr<GameObject>> playerObjects;
     std::shared_ptr<TopDownCamera> camera;
 
     void loadBulletFunctions(std::shared_ptr<TopDownCamera> camera);
@@ -55,7 +55,7 @@ private:
     void loadDoors();
     void loadFloor();
 
-    void loadPlayer(HealthComponent *pComponent, Direction enteredDirection);
+    void loadPlayer(std::vector<std::shared_ptr<HealthComponent>> pComponent, Direction enteredDirection);
 
     void loadDirectionalLight();
 

@@ -7,12 +7,15 @@
 #include <MouseButton.h>
 #include <Renderer.h>
 #include <map/RoomGraph.h>
+#include <JoystickAxis.h>
+#include <JoystickButton.h>
+#include <JoystickTranslator.h>
 #include "controls.h"
 
 Renderer renderer;
 std::shared_ptr<Room> room;
 std::shared_ptr<RoomGraph> roomGraph;
-HealthComponent* playerHealth;
+std::vector<std::shared_ptr<HealthComponent>> playerHealths;
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -34,17 +37,22 @@ void resize(int newWidth, int newHeight) {
 }
 
 void createKeyListeners() {
+    JoystickTranslator::getInstance()->init("../assets/controls.json");
     ControlsManager* cm = ControlsManager::getInstance();
-    cm->addBinding(MOVE_HORIZONTAL, new KeyboardButton(sf::Keyboard::A, sf::Keyboard::D));
-    cm->addBinding(MOVE_VERTICAL, new KeyboardButton(sf::Keyboard::W, sf::Keyboard::S));
-    cm->addBinding(SHOOT_BUTTON_LMB, new MouseButton(sf::Mouse::Left));
-    cm->addBinding(SHOOT_BUTTON_RMB, new MouseButton(sf::Mouse::Right));
+    cm->addBindings(MOVE_HORIZONTAL, {new KeyboardButton(sf::Keyboard::A, sf::Keyboard::D),
+                                      new JoystickAxis(IJoystickTranslation::Axis::LEFT_THUMBSTICK_X, true)});
+    cm->addBindings(MOVE_VERTICAL, {new KeyboardButton(sf::Keyboard::W, sf::Keyboard::S),
+                                    new JoystickAxis(IJoystickTranslation::Axis::LEFT_THUMBSTICK_Y, true)});
+    cm->addBindings(SHOOT_BUTTON_LMB, {new MouseButton(sf::Mouse::Left), new JoystickAxis(IJoystickTranslation::Axis::RT, false)});
+    cm->addBindings(SHOOT_BUTTON_RMB, {new MouseButton(sf::Mouse::Right), new JoystickButton(IJoystickTranslation::Button::RB)});
+    cm->addBinding(AIM_HORIZONTAL, new JoystickAxis(IJoystickTranslation::Axis::RIGHT_THUMBSTICK_X, true));
+    cm->addBinding(AIM_VERTICAL, new JoystickAxis(IJoystickTranslation::Axis::RIGHT_THUMBSTICK_Y, true));
 }
 
 void walk(Direction direction){
     roomGraph->walk(direction);
     room = roomGraph->getCurrentRoom();
-    room->load(camera, playerHealth, direction);
+    room->load(camera, playerHealths, direction);
 }
 
 int main() {
@@ -67,10 +75,11 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    playerHealth = new HealthComponent(2);
+    playerHealths.push_back(std::make_shared<HealthComponent>(2));
+    playerHealths.push_back(std::make_shared<HealthComponent>(2));
     roomGraph = std::make_shared<RoomGraph>(walk);
     room = roomGraph->getCurrentRoom();
-    room->load(camera, playerHealth, Direction::UP);
+    room->load(camera, playerHealths, Direction::UP);
 
     createKeyListeners();
 

@@ -12,14 +12,14 @@
 class HealthBar : public PositioningLayout {
 
 public:
-    HealthBar(HealthComponent* health);
+    HealthBar(std::shared_ptr<HealthComponent> health);
 
     virtual void getGLSquares(float layoutXPos, float layoutYPos, float layoutWidth, float layoutHeight,
                               std::map<std::string, IHudDrawable *> *map) override;
 
 protected:
     void damageTaken();
-    HealthComponent* health;
+    std::shared_ptr<HealthComponent> health;
     PositioningLayout* bar;
     bool dead = false;
 

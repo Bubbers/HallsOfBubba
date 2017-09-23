@@ -14,7 +14,7 @@
 using namespace std;
 using namespace chag;
 
-HealthBar::HealthBar(HealthComponent* health) : health(health), PositioningLayout(Dimension::fromPercentage(50),Dimension::fromPercentage(50)){
+HealthBar::HealthBar(std::shared_ptr<HealthComponent> health) : health(health), PositioningLayout(Dimension::fromPercentage(50),Dimension::fromPercentage(50)){
 
     ListLayout* root = new ListLayout(ListLayout::VERTICAL,Dimension::fromPixels(50),Dimension::fromPixels(35));
 

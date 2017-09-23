@@ -30,7 +30,7 @@ HallwayRoom::~HallwayRoom()
 }
 
 std::shared_ptr<GameObject> HallwayRoom::getEnemyObject(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet,
-                                                 std::shared_ptr<GameObject> playerObject,
+                                                 std::vector<std::shared_ptr<GameObject>> playerObjects,
                                                  HudRenderer *hudRenderer,
                                                  chag::float3 location)
 {
@@ -40,11 +40,11 @@ std::shared_ptr<GameObject> HallwayRoom::getEnemyObject(std::function<void(std::
     auto monsterMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/monster.obj");
     auto monsterCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/bubba_collision.obj");
     auto monsterObject = std::make_shared<GameObject>(monsterMesh, monsterCollisionMesh);
-    HealthComponent *monsterHealth = new HealthComponent(2);
+    std::shared_ptr<HealthComponent> monsterHealth = std::make_shared<HealthComponent>(2);
 
-    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObject));
+    monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObjects));
     allAlive.push_back(monsterHealth);
-    monsterObject->addComponent(monsterHealth);
+    monsterObject->addComponent(monsterHealth.get());
     monsterObject->setLocation(location);
     monsterObject->setRotation(make_quaternion_axis_angle(make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
     monsterObject->initializeModelMatrix();
@@ -113,10 +113,7 @@ void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
         obstacleObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(rand() % 360) ));
         m_scene->addShadowCaster(obstacleObject);
     } else if(randomNum == 1) {
-        std::shared_ptr<GameObject> monsterObject2 = getEnemyObject(spawnBullet,
-                                                                    playerObject,
-                                                                    hudRenderer,
-                                                                    location);
+        std::shared_ptr<GameObject> monsterObject2 = getEnemyObject(spawnBullet, playerObjects, hudRenderer, location);
         m_scene->addShadowCaster(monsterObject2);
     } else if(randomNum == 2) {
         addCrates(location);
