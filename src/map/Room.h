@@ -6,12 +6,13 @@
 #include <Scene.h>
 #include <Collider.h>
 #include <Renderer.h>
+#include <actors/Player.h>
 #include "Direction.h"
 #include "HudRenderer.h"
 
 class Room {
 public:
-    void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<HealthComponent>> players, Direction enteredDirection);
+    void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection);
     void addDoor(Direction direction, std::function<void(Direction direction)> callback);
 
     void display(Renderer &renderer,
@@ -55,7 +56,7 @@ private:
     void loadDoors();
     void loadFloor();
 
-    void loadPlayer(std::vector<std::shared_ptr<HealthComponent>> pComponent, Direction enteredDirection);
+    void loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction enteredDirection);
 
     void loadDirectionalLight();
 

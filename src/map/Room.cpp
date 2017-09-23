@@ -19,10 +19,11 @@
 #include <particles/TorchParticle.h>
 #include <particles/SecondAttackParticle.h>
 #include <components/BossController.h>
+#include <ControlStatus.h>
 #include "Room.h"
 #include "HallwayRoom.h"
 
-void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<HealthComponent>> playerHealths, Direction enteredDirection) {
+void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection) {
 
     if (isLoaded) {
         return;
@@ -40,7 +41,7 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_p
     loadDoors();
     loadDirectionalLight();
     loadLights();
-    loadPlayer(playerHealths, enteredDirection);
+    loadPlayer(players, enteredDirection);
     loadGameObjects();
 }
 
@@ -250,7 +251,7 @@ void Room::display(Renderer &renderer, std::shared_ptr<Camera> camera, float tim
     renderer.drawScene(camera.get(), m_scene.get(), timeSinceStart);
 }
 
-void Room::loadPlayer(std::vector<std::shared_ptr<HealthComponent>> playerHealths, Direction enteredDirection) {
+void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction enteredDirection) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
@@ -259,9 +260,9 @@ void Room::loadPlayer(std::vector<std::shared_ptr<HealthComponent>> playerHealth
 
     float i = 0;
 
-    for (auto playerHealth : playerHealths) {
+    for (auto player : players) {
 
-        if (playerHealth->getHealth() > 0) {
+        if (player->getHealthComponent()->getHealth() > 0) {
 
             std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
             pointLight->diffuseColor= chag::make_vector(0.50f,0.50f,0.20f);
@@ -275,10 +276,11 @@ void Room::loadPlayer(std::vector<std::shared_ptr<HealthComponent>> playerHealth
             m_scene->pointLights.push_back(pointLight);
 
             std::shared_ptr<GameObject> playerObject = std::make_shared<GameObject>(playerMesh, playerCollisionMesh);
-            playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight));
+            playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight,
+                                                            player->getActivator()));
 
-            allAlive.push_back(playerHealth);
-            playerObject->addComponent(playerHealth.get());
+            allAlive.push_back(player->getHealthComponent());
+            playerObject->addComponent(player->getHealthComponent().get());
             if (enteredDirection == Direction::UP) {
                 playerObject->setLocation(chag::make_vector(i, 0.0f, -8.0f));
             } else if (enteredDirection == Direction::DOWN) {
@@ -294,7 +296,7 @@ void Room::loadPlayer(std::vector<std::shared_ptr<HealthComponent>> playerHealth
             playerObject->setIdentifier(PLAYER_IDENTIFIER);
             playerObject->addCollidesWith({DOOR_IDENTIFIER, ENEMY_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
             m_scene->addShadowCaster(playerObject);
-            HealthBar *playerHealthBar = new HealthBar(playerHealth);
+            HealthBar *playerHealthBar = new HealthBar(player->getHealthComponent());
             hudRenderer->addRelativeLayout(playerObject, playerHealthBar);
             playerObjects.push_back(playerObject);
 

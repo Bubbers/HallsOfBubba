@@ -9,14 +9,14 @@
 #include <MoveComponent.h>
 #include <ObjectIdentifiers.h>
 #include <functional>
+#include <ControlStatus.h>
 
 class PlayerController : public IComponent {
 
 public:
     PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
                      std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc,
-                     Camera *camera,
-                     std::shared_ptr<PointLight> light);
+                     Camera *camera, std::shared_ptr<PointLight> light, ControlStatus::Activator activator);
     chag::float3 getPlaneIntersectionPoint();
 
     virtual void update(float dt) override;
@@ -35,6 +35,7 @@ private:
     std::shared_ptr<PointLight> light;
     std::pair<float, float> prevMousePosition = std::pair<float, float>(-1, -1);
     std::pair<float, float> virtualMousePosition = std::pair<float, float>(0, 0);
+    ControlStatus::Activator activator;
 
     chag::float3 getMouseRayInWorldSpace(float mouseX, float mouseY, int width, int height) const;
 

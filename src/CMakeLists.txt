@@ -9,6 +9,7 @@ add_subdirectory(ui)
 add_subdirectory(particles)
 add_subdirectory(map)
 add_subdirectory(statemachine)
+add_subdirectory(actors)
 
 # Define the executable
 set(EXECUTABLE_NAME HallsOfBubba)
