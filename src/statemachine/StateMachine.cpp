@@ -57,7 +57,7 @@ void StateMachine::addState(StateKey stateKey)
         return;
     }
 
-    state_map[stateKey] = std::make_shared<State>(stateKey);
+    state_map[stateKey] = std::make_shared<StateNode>(stateKey);
 }
 
 void StateMachine::connect(StateKey fromKey, StateKey toKey, transition_callback_t callback)
