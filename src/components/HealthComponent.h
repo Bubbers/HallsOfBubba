@@ -7,8 +7,8 @@
 
 
 #include <IComponent.h>
-#include <AudioManager.h>
 #include <functional>
+#include "ResourceManager.h"
 
 class HealthComponent : public IComponent {
 

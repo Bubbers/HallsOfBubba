@@ -81,8 +81,8 @@ void Room::loadWalls() {
 }
 
 void Room::loadBulletFunctions(std::shared_ptr<TopDownCamera> camera) {
-    m_shootSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/shoot.wav"));
-    m_blastSound = std::shared_ptr<sf::Sound>(AudioManager::loadAndFetchSound("../assets/sound/blast.wav"));
+    m_shootSound = std::shared_ptr<sf::Sound>(ResourceManager::loadAndFetchSound("../assets/sound/shoot.wav"));
+    m_blastSound = std::shared_ptr<sf::Sound>(ResourceManager::loadAndFetchSound("../assets/sound/blast.wav"));
 
     spawnBullet = [this, camera](std::weak_ptr<GameObject> shooter, std::shared_ptr<Texture> particleTexture) mutable {
         auto bulletObject = generateBulletBase(shooter);

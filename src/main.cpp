@@ -27,7 +27,10 @@ std::shared_ptr<TopDownCamera> camera;
 
 void idle(float timeSinceStart,float timeSinceLastCall) {
     room->update(timeSinceLastCall);
+
+#ifdef __linux__
     ResourceManager::update();
+#endif
 }
 
 // Called by the window mainloop

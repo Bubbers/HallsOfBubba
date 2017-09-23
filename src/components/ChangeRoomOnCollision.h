@@ -4,8 +4,8 @@
 
 #include <IComponent.h>
 #include <Scene.h>
-#include <AudioManager.h>
 #include <functional>
+#include "ResourceManager.h"
 
 class ChangeRoomOnCollision: public IComponent {
 public:
