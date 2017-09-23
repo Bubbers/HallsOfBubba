@@ -2,7 +2,7 @@
 #include "BossRoom.h"
 #include "HallwayRoom.h"
 
-RoomGraph::RoomGraph(std::function<void(Direction)> walkCallback,
+RoomGraph::RoomGraph(walk_callback_t walkCallback,
                      std::function<void()> &allPlayersDead)
 {
     generateGraph(walkCallback, allPlayersDead);
@@ -109,7 +109,7 @@ void RoomGraph::generatePath(level_pos_t startRoom,
     }
 }
 
-void RoomGraph::generateDoors(std::function<void(Direction)> walkCallback,
+void RoomGraph::generateDoors(walk_callback_t walkCallback,
                               unsigned int level)
 {
     for (int x = 0; x < GRAPH_WIDTH; ++x) {
