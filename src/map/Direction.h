@@ -1,15 +1,10 @@
-//
-// Created by simon on 2017-04-30.
-//
-
-#ifndef HALLSOFBUBBA_DIRECTION_H
-#define HALLSOFBUBBA_DIRECTION_H
+#pragma once
 
 enum Direction : int {
     UP,
     LEFT,
     DOWN,
-    RIGHT
+    RIGHT,
+    NEXT_LEVEL
 };
 
-#endif //HALLSOFBUBBA_DIRECTION_H
