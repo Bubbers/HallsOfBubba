@@ -1,7 +1,3 @@
-//
-// Created by simon on 2017-09-23.
-//
-
 #include "Player.h"
 
 Player::Player(ControlStatus::Activator activator) : activator(activator){

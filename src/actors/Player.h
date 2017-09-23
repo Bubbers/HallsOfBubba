@@ -1,7 +1,3 @@
-//
-// Created by simon on 2017-09-23.
-//
-
 #ifndef HALLSOFBUBBA_PLAYER_H
 #define HALLSOFBUBBA_PLAYER_H
 
