@@ -11,19 +11,22 @@
 #include <vector>
 #include "HudRenderer.h"
 
+typedef std::function<void()> lose_callback_t;
+typedef std::function<void(Direction)> walk_callback_t;
+
 class Room {
 public:
-    Room(std::function<void()> &allPlayersDead);
+    Room();
 
     void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection);
-    void addDoor(Direction direction, std::function<void(Direction direction)> callback);
+    void addDoor(Direction direction, walk_callback_t callback);
 
     void display(Renderer &renderer,
                  std::shared_ptr<Camera> camera,
                  float timeSinceStart,
                  float timeSinceLastCall);
 
-    void update(float dt);
+    void update(float dt, lose_callback_t loseCallback);
 
 protected:
 
@@ -46,7 +49,7 @@ protected:
 
     std::shared_ptr<GameObject> generateBulletBase(std::weak_ptr<GameObject> shooter);
 
-    std::vector<std::pair<Direction, std::function<void(Direction)>>> doors;
+    std::vector<std::pair<Direction, walk_callback_t>> doors;
 
     HudRenderer* hudRenderer;
 
@@ -65,8 +68,6 @@ private:
     void loadDirectionalLight();
 
     void loadHud(const std::shared_ptr<TopDownCamera> &camera);
-
-    std::function<void()> allPlayersDead;
 };
 
 

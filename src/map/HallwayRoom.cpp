@@ -20,8 +20,8 @@
 #include "HallwayRoom.h"
 
 
-HallwayRoom::HallwayRoom(std::function<void()> &allPlayersDead, bool includeObstacle)
-        : Room(allPlayersDead), includeObstacle(includeObstacle)
+HallwayRoom::HallwayRoom(bool includeObstacle)
+        : includeObstacle(includeObstacle)
 {
 }
 

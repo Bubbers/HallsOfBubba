@@ -4,7 +4,7 @@
 
 class BossRoom : public Room{
 public:
-    BossRoom(std::function<void()> &allPlayersDead);
+    BossRoom();
 
 protected:
     void loadGameObjects() override;

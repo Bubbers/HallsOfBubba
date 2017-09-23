@@ -8,7 +8,7 @@
 #include "BossRoom.h"
 #include "GameObject.h"
 
-BossRoom::BossRoom(std::function<void()> &allPlayersDead): Room(allPlayersDead)
+BossRoom::BossRoom()
 {
 }
 
