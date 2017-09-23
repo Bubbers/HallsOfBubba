@@ -13,7 +13,8 @@ class RoomGraph  {
 
 public:
 
-    RoomGraph(std::function<void(Direction)> walkCallback);
+    RoomGraph(std::function<void(Direction)> walkCallback, std::function<void()> &allPlayersDead);
+    ~RoomGraph();
 
     std::shared_ptr<Room> getCurrentRoom();
     void walk(Direction direction);
@@ -33,9 +34,10 @@ private:
     Direction directionWalked;
 
 
-    void generateGraph(std::function<void(Direction)> walkCallback);
+    void generateGraph(std::function<void(Direction)> walkCallback, std::function<void()> &function);
     void generatePath(std::pair<int, int> startRoom,
-                      std::pair<int, int> targetRoom);
+                      std::pair<int, int> targetRoom,
+                      std::function<void()> &allPlayersDead);
 
     void generateDoors(std::function<void(Direction)> walkCallback);
 };

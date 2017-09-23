@@ -15,7 +15,7 @@ class HudRenderer;
 class HallwayRoom : public Room {
 
 public:
-    HallwayRoom(bool includeObstacle);
+    HallwayRoom(std::function<void()> &allPlayersDead, bool includeObstacle);
     ~HallwayRoom();
 
     void loadGameObjects() override ;

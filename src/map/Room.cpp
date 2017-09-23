@@ -19,9 +19,14 @@
 #include <particles/TorchParticle.h>
 #include <particles/SecondAttackParticle.h>
 #include <components/BossController.h>
+#include <Logger.h>
 #include <ControlStatus.h>
 #include "Room.h"
 #include "HallwayRoom.h"
+
+Room::Room(std::function<void()> &allPlayersDead): allPlayersDead(allPlayersDead)
+{
+}
 
 void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection) {
 
@@ -234,15 +239,34 @@ void Room::addDoor(Direction direction, std::function<void(Direction direction)>
 
 void Room::update(float dt) {
     bool someoneDied = false;
-    for(auto it = allAlive.begin(); it < allAlive.end(); it++){
+    for (auto it = players.begin(); it < players.end();) {
         if((*it)->getHealth() <= 0){
-            it = allAlive.erase(it);
+            it = players.erase(it);
             someoneDied = true;
+        } else {
+            it++;
         }
     }
+
+    for (auto it = enemies.begin(); it < enemies.end();) {
+        if((*it)->getHealth() <= 0){
+            it = enemies.erase(it);
+            someoneDied = true;
+        } else {
+            it++;
+        }
+
+    }
+
     if(someoneDied) {
         hudRenderer->updateLayout();
     }
+
+    Logger::logInfo("Alive players: " + std::to_string(players.size()));
+    if (players.empty()) {
+        allPlayersDead();
+    }
+
     m_scene->update(dt);
     m_collider->updateCollision(m_scene.get());
 }
@@ -279,8 +303,10 @@ void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction en
             playerObject->addComponent(new PlayerController(spawnBullet, spawnBlastBullet, camera.get(), pointLight,
                                                             player->getActivator()));
 
-            allAlive.push_back(player->getHealthComponent());
-            playerObject->addComponent(player->getHealthComponent().get());
+            auto playerHealth = player->getHealthComponent();
+            this->players.push_back(playerHealth);
+            playerObject->addComponent(playerHealth.get());
+
             if (enteredDirection == Direction::UP) {
                 playerObject->setLocation(chag::make_vector(i, 0.0f, -8.0f));
             } else if (enteredDirection == Direction::DOWN) {
