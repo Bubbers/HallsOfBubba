@@ -17,9 +17,7 @@ void RoomGraph::walk(Direction direction)
 {
     if (direction == NEXT_LEVEL) {
         if (currentLevel < GRAPH_LEVELS) {
-            currentX = 3;
-            currentY = 0;
-            currentLevel++;
+            enterNewLevel(currentLevel + 1);
         } else {
             // TODO call win transition
         }
@@ -51,10 +49,11 @@ void RoomGraph::generateGraph(
         std::function<void(Direction)> walkCallback,
         std::function<void()> &allPlayersDead)
 {
-    auto startRoom = level_pos_t(3, 0);
-
-
     for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
+
+        levelStartPositions[level].first = (unsigned)rand() % GRAPH_WIDTH;
+        auto &startRoomPos = levelStartPositions[level];
+
         auto bossRoomPos = randomLevelPos();
         auto treasureRoomPos = randomLevelPos();
 
@@ -63,14 +62,12 @@ void RoomGraph::generateGraph(
         bossRoom->addDoor(NEXT_LEVEL, walkCallback);
         graph[bossRoomPos.first][bossRoomPos.second][currentLevel] = bossRoom;
 
-        generatePath(startRoom, treasureRoomPos, allPlayersDead, level);
-        generatePath(startRoom, bossRoomPos, allPlayersDead, level);
+        generatePath(startRoomPos, treasureRoomPos, allPlayersDead, level);
+        generatePath(startRoomPos, bossRoomPos, allPlayersDead, level);
         generateDoors(walkCallback, level);
     }
 
-    currentX = startRoom.first;
-    currentY = startRoom.second;
-    currentLevel = 0;
+    enterNewLevel(0);
 }
 
 level_pos_t RoomGraph::randomLevelPos()
@@ -136,5 +133,13 @@ void RoomGraph::generateDoors(walk_callback_t walkCallback,
 RoomGraph::~RoomGraph()
 {
 
+}
+
+void RoomGraph::enterNewLevel(unsigned int level)
+{
+    currentLevel = level;
+    auto &startRoomPos = levelStartPositions[currentLevel];
+    currentX = startRoomPos.first;
+    currentY = startRoomPos.second;
 }
 

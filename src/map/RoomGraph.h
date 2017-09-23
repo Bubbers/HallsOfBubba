@@ -31,6 +31,7 @@ private:
     std::shared_ptr<Room> graph[GRAPH_WIDTH][GRAPH_HEIGHT][GRAPH_LEVELS];
 
     level_pos_t getNextFromDir(Direction direction);
+    level_pos_t levelStartPositions[];
 
     void generateGraph(walk_callback_t walkCallback, std::function<void()> &function);
     void generatePath(level_pos_t startRoom,
@@ -41,4 +42,6 @@ private:
     void generateDoors(walk_callback_t walkCallback, unsigned int level);
 
     level_pos_t randomLevelPos();
+
+    void enterNewLevel(unsigned int level);
 };
