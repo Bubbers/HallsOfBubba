@@ -2,10 +2,20 @@
 #include "BossRoom.h"
 #include "HallwayRoom.h"
 
-RoomGraph::RoomGraph(walk_callback_t walkCallback,
-                     std::function<void()> &allPlayersDead)
+RoomGraph::RoomGraph(walk_callback_t walkCallback)
 {
-    generateGraph(walkCallback, allPlayersDead);
+    generateGraph(walkCallback);
+}
+
+RoomGraph::~RoomGraph()
+{
+    for (int x = 0; x < GRAPH_WIDTH; ++x) {
+        for (int y = 0; y < GRAPH_HEIGHT; ++y) {
+            for (int level = 0; level < GRAPH_LEVELS; ++level) {
+                 graph[x][y][level].reset();
+            }
+        }
+    }
 }
 
 std::shared_ptr<Room> RoomGraph::getCurrentRoom()
@@ -45,25 +55,24 @@ level_pos_t RoomGraph::getNextFromDir(Direction direction)
     return level_pos_t(currentX + nextX, currentY + nextY);
 };
 
-void RoomGraph::generateGraph(
-        std::function<void(Direction)> walkCallback,
-        std::function<void()> &allPlayersDead)
+void RoomGraph::generateGraph(walk_callback_t walkCallback)
 {
     for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
 
-        levelStartPositions[level].first = (unsigned)rand() % GRAPH_WIDTH;
+        levelStartPositions[level].first = (unsigned) rand() % GRAPH_WIDTH;
+        levelStartPositions[level].second = 0;
         auto &startRoomPos = levelStartPositions[level];
 
         auto bossRoomPos = randomLevelPos();
         auto treasureRoomPos = randomLevelPos();
 
         // TODO Make the boss rooms have different bosses
-        auto bossRoom = std::make_shared<BossRoom>(allPlayersDead);
+        auto bossRoom = std::make_shared<BossRoom>();
         bossRoom->addDoor(NEXT_LEVEL, walkCallback);
-        graph[bossRoomPos.first][bossRoomPos.second][currentLevel] = bossRoom;
+        graph[bossRoomPos.first][bossRoomPos.second][level] = bossRoom;
 
-        generatePath(startRoomPos, treasureRoomPos, allPlayersDead, level);
-        generatePath(startRoomPos, bossRoomPos, allPlayersDead, level);
+        generatePath(startRoomPos, treasureRoomPos, level);
+        generatePath(startRoomPos, bossRoomPos, level);
         generateDoors(walkCallback, level);
     }
 
@@ -78,7 +87,6 @@ level_pos_t RoomGraph::randomLevelPos()
 
 void RoomGraph::generatePath(level_pos_t startRoom,
                              level_pos_t targetRoom,
-                             std::function<void()> &allPlayersDead,
                              unsigned int level)
 {
     const int xMin = std::min(startRoom.first, targetRoom.first);
@@ -92,7 +100,7 @@ void RoomGraph::generatePath(level_pos_t startRoom,
         int x = startRoom.first;
 
         if (!graph[x][y][level]) {
-            graph[x][y][level] = std::make_shared<HallwayRoom>(allPlayersDead, false);
+            graph[x][y][level] = std::make_shared<HallwayRoom>(false);
         }
     }
 
@@ -101,7 +109,7 @@ void RoomGraph::generatePath(level_pos_t startRoom,
         int y = targetRoom.second;
 
         if (!graph[x][y][level]) {
-            graph[x][y][level] = std::make_shared<HallwayRoom>(allPlayersDead, false);
+            graph[x][y][level] = std::make_shared<HallwayRoom>(false);
         }
     }
 }
@@ -111,7 +119,7 @@ void RoomGraph::generateDoors(walk_callback_t walkCallback,
 {
     for (int x = 0; x < GRAPH_WIDTH; ++x) {
         for (int y = 0; y < GRAPH_HEIGHT; ++y) {
-            auto &room = graph[x][y][level];
+            auto room = graph[x][y][level];
             if (room) {
                 if (y + 1 < GRAPH_HEIGHT && graph[x][y + 1][level]) {
                     room->addDoor(Direction::UP, walkCallback);
@@ -128,11 +136,6 @@ void RoomGraph::generateDoors(walk_callback_t walkCallback,
             }
         }
     }
-}
-
-RoomGraph::~RoomGraph()
-{
-
 }
 
 void RoomGraph::enterNewLevel(unsigned int level)

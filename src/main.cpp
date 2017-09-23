@@ -29,10 +29,15 @@ const int SCREEN_HEIGHT = 480;
 
 std::shared_ptr<TopDownCamera> camera;
 
+void loseCallback() {
+    statemachine->queueTransition(INACTIVE);
+    statemachine->queueTransition(ACTIVE);
+};
+
 void idle(float timeSinceStart,float timeSinceLastCall) {
     statemachine->doTransitions();
 
-    roomGraph->getCurrentRoom()->update(timeSinceLastCall);
+    roomGraph->getCurrentRoom()->update(timeSinceLastCall, loseCallback);
 #ifdef __linux__
     ResourceManager::update();
 #endif
@@ -86,11 +91,6 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    std::function<void()> allPlayersDead = [&] () {
-        statemachine->queueTransition(INACTIVE);
-        statemachine->queueTransition(ACTIVE);
-    };
-
     statemachine->connect(INACTIVE, ACTIVE, [&]() {
         Logger::logInfo("New game");
 
@@ -99,7 +99,7 @@ int main() {
         players.push_back(std::make_shared<Player>(activator));
         players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
 
-        roomGraph = std::make_shared<RoomGraph>(walk, allPlayersDead);
+        roomGraph = std::make_shared<RoomGraph>(walk);
         roomGraph->getCurrentRoom()->load(camera, players, Direction::UP);
 
     });

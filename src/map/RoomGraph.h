@@ -9,13 +9,12 @@
 #define GRAPH_LEVELS 3
 
 typedef std::pair<unsigned int, unsigned int> level_pos_t;
-typedef std::function<void(Direction)> walk_callback_t;
+
 class RoomGraph  {
 
 public:
 
-    RoomGraph(walk_callback_t walkCallback,
-              std::function<void()> &allPlayersDead);
+    RoomGraph(walk_callback_t walkCallback);
 
     ~RoomGraph();
 
@@ -31,17 +30,16 @@ private:
     std::shared_ptr<Room> graph[GRAPH_WIDTH][GRAPH_HEIGHT][GRAPH_LEVELS];
 
     level_pos_t getNextFromDir(Direction direction);
-    level_pos_t levelStartPositions[];
+    level_pos_t levelStartPositions[GRAPH_LEVELS];
 
-    void generateGraph(walk_callback_t walkCallback, std::function<void()> &function);
+    void generateGraph(walk_callback_t walkCallback);
+
     void generatePath(level_pos_t startRoom,
                       level_pos_t targetRoom,
-                      std::function<void()> &allPlayersDead,
                       unsigned int level);
 
     void generateDoors(walk_callback_t walkCallback, unsigned int level);
 
     level_pos_t randomLevelPos();
-
     void enterNewLevel(unsigned int level);
 };

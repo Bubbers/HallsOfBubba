@@ -24,7 +24,7 @@
 #include "Room.h"
 #include "HallwayRoom.h"
 
-Room::Room(std::function<void()> &allPlayersDead): allPlayersDead(allPlayersDead)
+Room::Room()
 {
 }
 
@@ -236,11 +236,11 @@ void Room::loadDoors() {
 
 }
 
-void Room::addDoor(Direction direction, std::function<void(Direction direction)> callback) {
-    doors.push_back(std::pair<Direction, std::function<void(Direction)>>(direction, callback));
+void Room::addDoor(Direction direction, walk_callback_t walkCallback) {
+    doors.push_back(std::pair<Direction, walk_callback_t>(direction, walkCallback));
 }
 
-void Room::update(float dt) {
+void Room::update(float dt, lose_callback_t loseCallback) {
     bool someoneDied = false;
     for (auto it = players.begin(); it < players.end();) {
         if((*it)->getHealth() <= 0){
@@ -267,7 +267,7 @@ void Room::update(float dt) {
 
     Logger::logInfo("Alive players: " + std::to_string(players.size()));
     if (players.empty()) {
-        allPlayersDead();
+        loseCallback();
     }
 
     m_scene->update(dt);
@@ -310,15 +310,24 @@ void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction en
             this->players.push_back(playerHealth);
             playerObject->addComponent(playerHealth.get());
 
-            if (enteredDirection == Direction::UP) {
-                playerObject->setLocation(chag::make_vector(i, 0.0f, -8.0f));
-            } else if (enteredDirection == Direction::DOWN) {
-                playerObject->setLocation(chag::make_vector(-i, 0.0f, 8.0f));
-            } else if (enteredDirection == Direction::LEFT) {
-                playerObject->setLocation(chag::make_vector(-8.0f, 0.0f, i));
-            } else if (enteredDirection == Direction::RIGHT) {
-                playerObject->setLocation(chag::make_vector(8.0f, 0.0f, -i));
+            switch (enteredDirection) {
+                case Direction::UP:
+                    playerObject->setLocation(chag::make_vector(i, 0.0f, -8.0f));
+                    break;
+                case Direction::DOWN:
+                    playerObject->setLocation(chag::make_vector(-i, 0.0f, 8.0f));
+                    break;
+                case Direction::LEFT:
+                    playerObject->setLocation(chag::make_vector(-8.0f, 0.0f, i));
+                    break;
+                case Direction::RIGHT:
+                    playerObject->setLocation(chag::make_vector(8.0f, 0.0f, -i));
+                    break;
+                case Direction::NEXT_LEVEL:
+                    playerObject->setLocation(chag::make_vector(-i, 0.0f, 8.0f));
+                    break;
             }
+
             StandardRenderer *stdrenderer = new StandardRenderer(playerMesh, standardShader);
             playerObject->addRenderComponent(stdrenderer);
             playerObject->setDynamic(true);
