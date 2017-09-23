@@ -29,6 +29,11 @@ const int SCREEN_HEIGHT = 480;
 
 std::shared_ptr<TopDownCamera> camera;
 
+void winCallback() {
+    statemachine->queueTransition(INACTIVE);
+    Logger::logInfo("WIN");
+};
+
 void loseCallback() {
     statemachine->queueTransition(INACTIVE);
     statemachine->queueTransition(ACTIVE);
@@ -67,7 +72,7 @@ void createKeyListeners() {
 }
 
 void walk(Direction direction){
-    roomGraph->walk(direction);
+    roomGraph->walk(direction, winCallback);
     roomGraph->getCurrentRoom()->load(camera, players, direction);
 }
 
