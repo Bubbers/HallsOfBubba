@@ -20,6 +20,11 @@ std::shared_ptr<Room> room;
 std::shared_ptr<RoomGraph> roomGraph;
 std::vector<std::shared_ptr<Player>> players;
 
+const StateKey INACTIVE = 0;
+const StateKey ACTIVE = 1;
+std::shared_ptr<StateMachine> statemachine = std::shared_ptr<StateMachine>(new StateMachine({INACTIVE, ACTIVE}));
+
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -65,17 +70,6 @@ void walk(Direction direction){
 int main() {
     srand(time(NULL));
 
-    const StateKey INACTIVE = 0;
-    const StateKey ACTIVE = 1;
-
-    StateMachine statemachine({INACTIVE, ACTIVE});
-
-    statemachine.connect(INACTIVE, ACTIVE, []() {
-        Logger::logDebug("New game");
-    });
-
-    statemachine.transitionToState(ACTIVE);
-
     Logger::addLogHandler(new StdOutLogHandler());
     Logger::setLogLevel(LogLevel::INFO);
 
@@ -93,15 +87,28 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    ControlStatus::Activator activator = (ControlStatus::Activator)(ControlStatus::Activator::KEYBOARD | ControlStatus::Activator::MOUSE);
-    players.push_back(std::make_shared<Player>(activator));
-    players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
-    roomGraph = std::make_shared<RoomGraph>(walk);
-    room = roomGraph->getCurrentRoom();
-    room->load(camera, players, Direction::UP);
+    statemachine->connect(INACTIVE, ACTIVE, [&]() {
+        Logger::logInfo("New game");
+
+        ControlStatus::Activator activator = (ControlStatus::Activator)
+                (ControlStatus::Activator::KEYBOARD | ControlStatus::Activator::MOUSE);
+        players.push_back(std::make_shared<Player>(activator));
+        players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
+
+        roomGraph = std::make_shared<RoomGraph>(walk);
+        room = roomGraph->getCurrentRoom();
+        room->load(camera, players, Direction::UP);
+
+    });
+
+    statemachine->connect(ACTIVE, INACTIVE, [&]() {
+        Logger::logInfo("Stop game");
+
+    });
 
     createKeyListeners();
 
+    statemachine->transitionToState(ACTIVE);
     win->start(60);
 
     return 0;
