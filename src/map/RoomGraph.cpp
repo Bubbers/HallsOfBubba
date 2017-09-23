@@ -1,7 +1,3 @@
-//
-// Created by simon on 2017-04-30.
-//
-
 #include "RoomGraph.h"
 #include "BossRoom.h"
 #include "HallwayRoom.h"
@@ -51,12 +47,12 @@ void RoomGraph::generateGraph(std::function<void(Direction)> walkCallback, std::
 {
     auto startRoom    = std::pair<int, int>(3, 0);
 
-    int bossRoomX = rand() % 7;
-    int bossRoomY = rand() % 7;
+    int bossRoomX = rand() % GRAPH_WIDTH;
+    int bossRoomY = rand() % GRAPH_HEIGHT;
     auto bossRoom     = std::pair<int, int>(bossRoomX, bossRoomY);
 
-    int treasureRoomX = rand() % 7;
-    int treasureRoomY = rand() % 7;
+    int treasureRoomX = rand() % GRAPH_WIDTH;
+    int treasureRoomY = rand() % GRAPH_HEIGHT;
 
     auto treasureRoom = std::pair<int, int>(treasureRoomX, treasureRoomY);
 
@@ -99,16 +95,16 @@ void RoomGraph::generatePath(std::pair<int, int> startRoom,
 }
 
 void RoomGraph::generateDoors(std::function<void(Direction)> walkCallback) {
-    for (int x = 0; x < 7; ++x) {
-        for (int y = 0; y < 7; ++y) {
+    for (int x = 0; x < GRAPH_WIDTH; ++x) {
+        for (int y = 0; y < GRAPH_HEIGHT; ++y) {
             if(graph[x][y]) {
-                if (y + 1 < 7 && graph[x][y + 1]) {
+                if (y + 1 < GRAPH_HEIGHT && graph[x][y + 1]) {
                     graph[x][y]->addDoor(Direction::UP, walkCallback);
                 }
                 if (y > 0 && graph[x][y - 1]) {
                     graph[x][y]->addDoor(Direction::DOWN, walkCallback);
                 }
-                if (x + 1 < 7 && graph[x + 1][y]) {
+                if (x + 1 < GRAPH_WIDTH && graph[x + 1][y]) {
                     graph[x][y]->addDoor(Direction::RIGHT, walkCallback);
                 }
                 if (x > 0 && graph[x - 1][y]) {
