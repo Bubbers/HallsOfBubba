@@ -23,19 +23,17 @@ std::shared_ptr<Room> RoomGraph::getCurrentRoom()
     return graph[currentX][currentY][currentLevel];
 }
 
-void RoomGraph::walk(Direction direction, win_callback_t winCallback)
+void RoomGraph::nextLevel(win_callback_t winCallback)
 {
-    // Special case if changing level
-    if (direction == NEXT_LEVEL) {
-        if (currentLevel < GRAPH_LEVELS) {
-            enterNewLevel(currentLevel + 1);
-        } else {
-            winCallback();
-        }
-        return;
+    if (currentLevel < GRAPH_LEVELS) {
+        enterNewLevel(currentLevel + 1);
+    } else {
+        winCallback();
     }
+}
 
-    // General case
+void RoomGraph::walk(Direction direction)
+{
     level_pos_t next = getNextFromDir(direction);
     if (!graph[next.first][next.second][currentLevel]) {
         throw "Tried to get a room that didn't exist";

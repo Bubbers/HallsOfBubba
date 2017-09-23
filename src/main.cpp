@@ -71,8 +71,12 @@ void createKeyListeners() {
     cm->addBinding(AIM_VERTICAL, new JoystickAxis(IJoystickTranslation::Axis::RIGHT_THUMBSTICK_Y, true));
 }
 
-void walk(Direction direction){
-    roomGraph->walk(direction, winCallback);
+void walk(Direction direction) {
+    if (direction == NEXT_LEVEL) {
+        roomGraph->nextLevel(winCallback);
+    } else {
+        roomGraph->walk(direction);
+    }
     roomGraph->getCurrentRoom()->load(camera, players, direction);
 }
 

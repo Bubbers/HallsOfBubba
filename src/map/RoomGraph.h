@@ -20,7 +20,8 @@ public:
     ~RoomGraph();
 
     std::shared_ptr<Room> getCurrentRoom();
-    void walk(Direction direction, win_callback_t winCallback);
+    void walk(Direction direction);
+    void nextLevel(win_callback_t winCallback);
 
 private:
 
