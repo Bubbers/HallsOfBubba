@@ -23,6 +23,7 @@
 HallwayRoom::HallwayRoom(bool includeObstacle)
         : includeObstacle(includeObstacle)
 {
+    mapSymbol = "X";
 }
 
 HallwayRoom::~HallwayRoom()

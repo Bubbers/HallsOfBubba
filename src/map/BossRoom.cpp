@@ -10,6 +10,7 @@
 
 BossRoom::BossRoom()
 {
+    mapSymbol = "B";
 }
 
 void BossRoom::loadGameObjects() {

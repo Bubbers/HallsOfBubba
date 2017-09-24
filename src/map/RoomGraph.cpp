@@ -1,3 +1,4 @@
+#include <Logger.h>
 #include "RoomGraph.h"
 #include "BossRoom.h"
 #include "HallwayRoom.h"
@@ -141,9 +142,44 @@ void RoomGraph::generateDoors(walk_callback_t walkCallback,
 
 void RoomGraph::enterNewLevel(unsigned int level)
 {
+
+    printLevelLayout(level);
+
     currentLevel = level;
     auto &startRoomPos = levelStartPositions[currentLevel];
     currentX = startRoomPos.first;
     currentY = startRoomPos.second;
+}
+
+void RoomGraph::printLevelLayout(unsigned int level)
+{
+    Logger::logInfo("Layout of level " + std::to_string(level));
+    std::string hline = "";
+
+    for (unsigned int i = 0; i < GRAPH_WIDTH + 2; ++i) {
+        hline.append("-");
+    }
+
+    Logger::logInfo(hline);
+    for (int y = (GRAPH_HEIGHT - 1); y >= 0; --y) {
+        std::string mline = "|";
+        for (int x = 0; x < GRAPH_WIDTH; ++x) {
+            if (graph[x][y][level]) {
+                auto &startRoomPos = levelStartPositions[level];
+
+                if (x == startRoomPos.first && y == startRoomPos.second) {
+                    mline.append("S");
+                } else {
+                    mline.append(graph[x][y][level]->getMapSymbol());
+                }
+            } else {
+                mline.append(" ");
+            }
+
+        }
+        mline.append("|");
+        Logger::logInfo(mline);
+    }
+    Logger::logInfo(hline);
 }
 
