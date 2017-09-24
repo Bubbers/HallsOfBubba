@@ -265,7 +265,6 @@ void Room::update(float dt, lose_callback_t loseCallback) {
         hudRenderer->updateLayout();
     }
 
-    Logger::logInfo("Alive players: " + std::to_string(players.size()));
     if (players.empty()) {
         loseCallback();
     }
