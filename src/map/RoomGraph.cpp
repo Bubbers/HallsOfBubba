@@ -98,7 +98,7 @@ void RoomGraph::generatePath(level_pos_t startRoom,
     const int yMax = std::max(startRoom.second, targetRoom.second);
 
     // Create corridor in Y axis
-    for (int y = yMin; y < yMax; ++y) {
+    for (int y = yMin; y <= yMax; ++y) {
         int x = startRoom.first;
 
         if (!graph[x][y][level]) {
@@ -107,7 +107,7 @@ void RoomGraph::generatePath(level_pos_t startRoom,
     }
 
     // Create corridor in X axis
-    for (int x = xMin; x < xMax; ++x) {
+    for (int x = xMin; x <= xMax; ++x) {
         int y = targetRoom.second;
 
         if (!graph[x][y][level]) {
