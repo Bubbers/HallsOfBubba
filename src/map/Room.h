@@ -28,6 +28,8 @@ public:
 
     void update(float dt, lose_callback_t loseCallback);
 
+    const std::string getMapSymbol();
+
 protected:
 
     virtual void loadLights() {};
@@ -57,6 +59,8 @@ protected:
     std::shared_ptr<sf::Sound> m_blastSound;
     std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBullet;
     std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBullet;
+
+    std::string mapSymbol;
 
 private:
     void loadWalls();

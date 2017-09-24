@@ -391,3 +391,7 @@ void Room::loadDirectionalLight() {
     directionalLight->direction= -chag::make_vector(0.0f,-10.0f,10.0f);
     m_scene->directionalLight = directionalLight;
 }
+
+const std::string Room::getMapSymbol() {
+    return mapSymbol;
+}

@@ -44,4 +44,6 @@ private:
 
     level_pos_t randomLevelPos();
     void enterNewLevel(unsigned int level);
+
+    void printLevelLayout(unsigned int level);
 };
