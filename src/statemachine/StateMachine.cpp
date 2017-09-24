@@ -1,5 +1,4 @@
 #include "StateMachine.h"
-#include <exception>
 #include <Logger.h>
 
 StateMachine::StateMachine(const std::vector<StateKey> keys)
@@ -25,7 +24,7 @@ void StateMachine::queueTransition(StateKey newStateKey)
         throw std::invalid_argument("Trying to transition to non-existing state");
     }
 
-    Logger::logInfo("Queueing a transition to " + std::to_string(newStateKey));
+    Logger::logDebug("Queueing a transition to " + std::to_string(newStateKey));
     waitingTransitions.push_back(newStateKey);
 }
 
@@ -62,7 +61,6 @@ bool StateMachine::hasState(const StateKey key) const
 
 void StateMachine::doTransitions()
 {
-    Logger::logInfo("Waiting transitions: " + std::to_string(waitingTransitions.size()));
     for (auto it = waitingTransitions.begin(); it < waitingTransitions.end();) {
         auto newStateKey = *it;
         waitingTransitions.erase(it);
@@ -74,7 +72,7 @@ void StateMachine::doTransition(StateKey newStateKey) {
     auto currentState = state_map[currentStateKey];
     auto newState = state_map[newStateKey];
 
-    Logger::logInfo("Current: " + std::to_string(currentStateKey) + " next: " + std::to_string(newStateKey));
+    Logger::logDebug("Current: " + std::to_string(currentStateKey) + " next: " + std::to_string(newStateKey));
     if (!currentState->hasConnection(newState->id)) {
         throw std::invalid_argument("Trying to transition to a state to which there"
                                             " is no connection from the current state");
