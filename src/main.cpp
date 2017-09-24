@@ -49,7 +49,7 @@ void idle(float timeSinceStart, float timeSinceLastCall) {
 
     if(roomGraph) {
         roomGraph->getCurrentRoom()->update(timeSinceLastCall, loseCallback);
-    } else {
+    } else { // currentScene = menu scene if no room is active
         currentScene->update(timeSinceLastCall);
     }
 
