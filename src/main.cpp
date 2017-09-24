@@ -36,7 +36,7 @@ std::shared_ptr<Scene> currentScene;
 
 void winCallback() {
     statemachine->queueTransition(INACTIVE);
-    Logger::logInfo("WIN");
+    statemachine->queueTransition(MENU);
 };
 
 void loseCallback() {
@@ -95,8 +95,9 @@ void initMenu() {
     currentScene = std::make_shared<Scene>();
     std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
     HudRenderer *hudRenderer = new HudRenderer();
-    hudRenderer->setLayout(new Menu([&numPlayers](int players){
-        numPlayers = players;
+    hudRenderer->setLayout(new Menu([](int newNumPlayers){
+        players.clear();
+        numPlayers = newNumPlayers;
         statemachine->queueTransition(ACTIVE);
     }));
     hudObj->addRenderComponent(hudRenderer);
@@ -108,6 +109,7 @@ int main() {
     srand(time(NULL));
 
     Logger::addLogHandler(new StdOutLogHandler());
+
     Logger::setLogLevel(LogLevel::INFO);
 
     Window* win = new Window(SCREEN_WIDTH, SCREEN_HEIGHT, "Halls of Bubba");
@@ -124,7 +126,7 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    std::function<void()> initGame = [&]() {
+    std::function<void()> initGame = []() {
         Logger::logInfo("New game");
 
         if(numPlayers == 1) {

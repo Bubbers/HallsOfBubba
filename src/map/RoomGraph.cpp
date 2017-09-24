@@ -26,7 +26,7 @@ std::shared_ptr<Room> RoomGraph::getCurrentRoom()
 
 void RoomGraph::nextLevel(win_callback_t winCallback)
 {
-    if (currentLevel < GRAPH_LEVELS) {
+    if (currentLevel < GRAPH_LEVELS - 1) {
         enterNewLevel(currentLevel + 1);
     } else {
         winCallback();
