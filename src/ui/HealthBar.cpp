@@ -31,7 +31,7 @@ HealthBar::HealthBar(std::shared_ptr<HealthComponent> health) : health(health), 
     root->addChild(name);
     root->addChild(border);
 
-    addChild(root,Dimension::fromPercentage(-8),Dimension::fromPercentage(-30));
+    addChild(root,Dimension::fromPixels(-25),Dimension::fromPercentage(-30));
 
     health->addDamageListener([this](int damageTake) -> void { this->updateLife(); });
 
