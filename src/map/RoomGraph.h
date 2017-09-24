@@ -6,7 +6,7 @@
 
 #define GRAPH_WIDTH 7
 #define GRAPH_HEIGHT 7
-#define GRAPH_LEVELS 3
+#define GRAPH_LEVELS 1
 
 typedef std::pair<unsigned int, unsigned int> level_pos_t;
 typedef std::function<void()> win_callback_t;
