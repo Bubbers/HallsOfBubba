@@ -21,10 +21,7 @@ public:
     void load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_ptr<Player>> players, Direction enteredDirection);
     void addDoor(Direction direction, walk_callback_t callback);
 
-    void display(Renderer &renderer,
-                 std::shared_ptr<Camera> camera,
-                 float timeSinceStart,
-                 float timeSinceLastCall);
+    std::shared_ptr<Scene> getScene();
 
     void update(float dt, lose_callback_t loseCallback);
 

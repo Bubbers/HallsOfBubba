@@ -273,10 +273,6 @@ void Room::update(float dt, lose_callback_t loseCallback) {
     m_collider->updateCollision(m_scene.get());
 }
 
-void Room::display(Renderer &renderer, std::shared_ptr<Camera> camera, float timeSinceStart, float timeSinceLastCall) {
-    renderer.drawScene(camera.get(), m_scene.get(), timeSinceStart);
-}
-
 void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction enteredDirection) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
@@ -393,4 +389,8 @@ void Room::loadDirectionalLight() {
 
 const std::string Room::getMapSymbol() {
     return mapSymbol;
+}
+
+std::shared_ptr<Scene> Room::getScene() {
+    return m_scene;
 }
