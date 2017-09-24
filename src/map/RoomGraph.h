@@ -46,4 +46,6 @@ private:
     void enterNewLevel(unsigned int level);
 
     void printLevelLayout(unsigned int level);
+
+    level_pos_t randomNewLevelPos(std::vector<level_pos_t> occupied);
 };
