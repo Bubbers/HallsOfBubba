@@ -47,5 +47,8 @@ int HealthComponent::getMaxHealth() {
 
 void HealthComponent::restoreHealth() {
     this->health = maxHealth;
+    for (auto listener : damageListeners) {
+        listener(1); //The 1 value is ignored -> hackish TODO
+    }
 }
 

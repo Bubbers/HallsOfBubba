@@ -18,7 +18,7 @@ public:
                               std::map<std::string, IHudDrawable *> *map) override;
 
 protected:
-    void damageTaken();
+    void updateLife();
     std::shared_ptr<HealthComponent> health;
     PositioningLayout* bar;
     bool dead = false;

@@ -33,11 +33,11 @@ HealthBar::HealthBar(std::shared_ptr<HealthComponent> health) : health(health), 
 
     addChild(root,Dimension::fromPercentage(-8),Dimension::fromPercentage(-30));
 
-    health->addDamageListener([this](int damageTake) -> void { this->damageTaken(); });
+    health->addDamageListener([this](int damageTake) -> void { this->updateLife(); });
 
 }
 
-void HealthBar::damageTaken() {
+void HealthBar::updateLife() {
 
     if(bar->getRenderedBackground() != nullptr) {
         bar->getRenderedBackground()->setScale(chag::make_vector((float)health->getHealth()/(float)health->getMaxHealth(),1.0f));
@@ -51,6 +51,6 @@ void HealthBar::getGLSquares(float layoutXPos, float layoutYPos, float layoutWid
                              map<string, IHudDrawable *> *map) {
     if(!dead) {
         PositioningLayout::getGLSquares(layoutXPos, layoutYPos, layoutWidth, layoutHeight, map);
-        damageTaken();
+        updateLife();
     }
 }
