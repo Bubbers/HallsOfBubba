@@ -69,7 +69,7 @@ void RoomGraph::generateGraph(walk_callback_t walkCallback)
         auto treasureRoomPos = randomNewLevelPos({startRoomPos, bossRoomPos});
 
         // TODO Make the boss rooms have different bosses
-        auto bossRoom = std::make_shared<BossRoom>(walkCallback);        //bossRoom->addDoor(NEXT_LEVEL, walkCallback);
+        auto bossRoom = std::make_shared<BossRoom>(walkCallback);
         graph[bossRoomPos.first][bossRoomPos.second][level] = bossRoom;
 
         generatePath(startRoomPos, treasureRoomPos, level);
@@ -85,12 +85,16 @@ level_pos_t RoomGraph::randomNewLevelPos(std::vector<level_pos_t> occupied)
     while (true) {
         level_pos_t rpos = randomLevelPos();
 
+        bool isOccupied = false;
         for (level_pos_t opos : occupied) {
             if (opos == rpos) {
-                continue;
+                isOccupied = true;
+                break;
             }
         }
-        return rpos;
+
+        if (!isOccupied)
+            return rpos;
     }
 }
 
