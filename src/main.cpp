@@ -13,7 +13,9 @@
 #include <ResourceManager.h>
 #include <statemachine/StateMachine.h>
 #include <actors/Player.h>
+#include <ui/Menu.h>
 #include "controls.h"
+#include <GameObject.h>
 
 Renderer renderer;
 std::shared_ptr<RoomGraph> roomGraph;
@@ -21,13 +23,16 @@ std::vector<std::shared_ptr<Player>> players;
 
 const StateKey INACTIVE = 0;
 const StateKey ACTIVE = 1;
-std::shared_ptr<StateMachine> statemachine = std::shared_ptr<StateMachine>(new StateMachine({INACTIVE, ACTIVE}));
-
+const StateKey MENU = 2;
+std::shared_ptr<StateMachine> statemachine = std::shared_ptr<StateMachine>(new StateMachine({MENU, INACTIVE, ACTIVE}));
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+int numPlayers = 1;
+
 std::shared_ptr<TopDownCamera> camera;
+std::shared_ptr<Scene> currentScene;
 
 void winCallback() {
     statemachine->queueTransition(INACTIVE);
@@ -39,10 +44,15 @@ void loseCallback() {
     statemachine->queueTransition(ACTIVE);
 };
 
-void idle(float timeSinceStart,float timeSinceLastCall) {
+void idle(float timeSinceStart, float timeSinceLastCall) {
     statemachine->doTransitions();
 
-    roomGraph->getCurrentRoom()->update(timeSinceLastCall, loseCallback);
+    if(roomGraph) {
+        roomGraph->getCurrentRoom()->update(timeSinceLastCall, loseCallback);
+    } else {
+        currentScene->update(timeSinceLastCall);
+    }
+
 #ifdef __linux__
     ResourceManager::update();
 #endif
@@ -50,7 +60,7 @@ void idle(float timeSinceStart,float timeSinceLastCall) {
 
 // Called by the window mainloop
 void display(float timeSinceStart,float timeSinceLastCall) {
-    roomGraph->getCurrentRoom()->display(renderer, camera, timeSinceStart, timeSinceLastCall);
+    renderer.drawScene(camera.get(), currentScene.get(), timeSinceStart);
 }
 
 // Called when the window gets resized
@@ -78,6 +88,20 @@ void walk(Direction direction) {
         roomGraph->walk(direction);
     }
     roomGraph->getCurrentRoom()->load(camera, players, direction);
+    currentScene = roomGraph->getCurrentRoom()->getScene();
+}
+
+void initMenu() {
+    currentScene = std::make_shared<Scene>();
+    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
+    HudRenderer *hudRenderer = new HudRenderer();
+    hudRenderer->setLayout(new Menu([&numPlayers](int players){
+        numPlayers = players;
+        statemachine->queueTransition(ACTIVE);
+    }));
+    hudObj->addRenderComponent(hudRenderer);
+    currentScene->addTransparentObject(hudObj);
+    roomGraph = nullptr;
 }
 
 int main() {
@@ -100,18 +124,33 @@ int main() {
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
 
-    statemachine->connect(INACTIVE, ACTIVE, [&]() {
+    std::function<void()> allPlayersDead = [&] () {
+        statemachine->queueTransition(INACTIVE);
+        statemachine->queueTransition(MENU);
+    };
+
+    std::function<void()> initGame = [&]() {
         Logger::logInfo("New game");
 
-        ControlStatus::Activator activator = (ControlStatus::Activator)
-                (ControlStatus::Activator::KEYBOARD | ControlStatus::Activator::MOUSE);
-        players.push_back(std::make_shared<Player>(activator));
-        players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
+        if(numPlayers == 1) {
+            players.push_back(std::make_shared<Player>(ControlStatus::Activator::ALL));
+        } else if (numPlayers == 2) {
+            ControlStatus::Activator activator = (ControlStatus::Activator)
+                    (ControlStatus::KEYBOARD | ControlStatus::MOUSE);
+            players.push_back(std::make_shared<Player>(activator));
+            players.push_back(std::make_shared<Player>(ControlStatus::Activator::JOYSTICK));
+        } else {
+            throw std::invalid_argument("Only one or two players supported.");
+        }
 
         roomGraph = std::make_shared<RoomGraph>(walk);
         roomGraph->getCurrentRoom()->load(camera, players, Direction::UP);
+        currentScene = roomGraph->getCurrentRoom()->getScene();
+    };
 
-    });
+    statemachine->connect(MENU, ACTIVE, initGame);
+
+    statemachine->connect(INACTIVE, MENU, initMenu);
 
     statemachine->connect(ACTIVE, INACTIVE, [&]() {
         Logger::logInfo("Stop game");
@@ -120,8 +159,10 @@ int main() {
 
     createKeyListeners();
 
-    statemachine->queueTransition(ACTIVE);
+    initMenu();
+
     win->start(60);
 
     return 0;
 }
+
