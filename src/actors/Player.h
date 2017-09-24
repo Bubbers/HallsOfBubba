@@ -4,6 +4,7 @@
 
 #include <ControlStatus.h>
 #include <components/HealthComponent.h>
+#include <components/PlayerHealthComponent.h>
 
 class Player {
 
@@ -13,7 +14,7 @@ public:
     ControlStatus::Activator getActivator();
 
 private:
-    std::shared_ptr<HealthComponent> healthComponent = std::make_shared<HealthComponent>(2);
+    std::shared_ptr<HealthComponent> healthComponent = std::make_shared<PlayerHealthComponent>(2);
     ControlStatus::Activator activator;
 
 };

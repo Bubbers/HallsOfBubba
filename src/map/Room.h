@@ -36,7 +36,7 @@ protected:
 
     bool isLoaded = false;
 
-    std::vector<std::shared_ptr<HealthComponent>> players;
+    std::vector<std::shared_ptr<Player>> players;
     std::vector<std::shared_ptr<HealthComponent>> enemies;
 
     std::shared_ptr<Scene> m_scene;

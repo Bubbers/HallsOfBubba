@@ -5,13 +5,16 @@
 #ifndef HALLSOFBUBBA_PLAYEROBJECT_H
 #define HALLSOFBUBBA_PLAYEROBJECT_H
 
+#define PLAYER_STRENGTH 19.0f
 
 #include <MoveComponent.h>
 #include <ObjectIdentifiers.h>
 #include <functional>
 #include <ControlStatus.h>
+#include "JumpingController.h"
+#include <ControlsManager.h>
 
-class PlayerController : public IComponent {
+class PlayerController : public JumpingController {
 
 public:
     PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
@@ -44,6 +47,13 @@ private:
     void updateVirtualMousePositionBasedOnJoystick(int width, int height);
 
     float clip(float min, float toClip, float max);
+
+    void movePlayer(float dt, std::shared_ptr<GameObject> &owner_ptr,
+                                    ControlsManager *controlsManager);
+
+    void handleShoots(float dt, std::shared_ptr<GameObject> &owner_ptr, ControlsManager *cm);
+
+    void rotateTowardsMouse(std::shared_ptr<GameObject> &owner_ptr);
 };
 
 

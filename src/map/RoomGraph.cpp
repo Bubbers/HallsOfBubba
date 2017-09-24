@@ -59,6 +59,7 @@ level_pos_t RoomGraph::getNextFromDir(Direction direction)
 
 void RoomGraph::generateGraph(walk_callback_t walkCallback)
 {
+
     for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
 
         levelStartPositions[level].first = (unsigned) rand() % GRAPH_WIDTH;

@@ -36,6 +36,8 @@ void Room::load(std::shared_ptr<TopDownCamera> camera, std::vector<std::shared_p
     }
     isLoaded = true;
 
+    this->players = players;
+
     m_collider = std::shared_ptr<Collider>(ColliderFactory::getTwoPhaseCollider());
     m_scene = std::make_shared<Scene>();
     this->camera = camera;
@@ -244,7 +246,7 @@ void Room::addDoor(Direction direction, walk_callback_t walkCallback) {
 void Room::update(float dt, lose_callback_t loseCallback) {
     bool someoneDied = false;
     for (auto it = players.begin(); it < players.end();) {
-        if((*it)->getHealth() <= 0){
+        if((*it)->getHealthComponent()->getHealth() <= 0){
             it = players.erase(it);
             someoneDied = true;
         } else {
@@ -303,7 +305,6 @@ void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction en
                                                             player->getActivator()));
 
             auto playerHealth = player->getHealthComponent();
-            this->players.push_back(playerHealth);
             playerObject->addComponent(playerHealth.get());
 
             playerObject->addComponent(new HealOnRevivePoint(playerHealth));

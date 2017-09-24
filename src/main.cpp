@@ -79,6 +79,7 @@ void createKeyListeners() {
     cm->addBindings(SHOOT_BUTTON_RMB, {new MouseButton(sf::Mouse::Right), new JoystickButton(IJoystickTranslation::Button::RB)});
     cm->addBinding(AIM_HORIZONTAL, new JoystickAxis(IJoystickTranslation::Axis::RIGHT_THUMBSTICK_X, true));
     cm->addBinding(AIM_VERTICAL, new JoystickAxis(IJoystickTranslation::Axis::RIGHT_THUMBSTICK_Y, true));
+    cm->addBindings(JUMP_BUTTON, {new KeyboardButton(sf::Keyboard::Space), new JoystickButton(IJoystickTranslation::Button::A)});
 }
 
 void walk(Direction direction) {

@@ -21,15 +21,7 @@ void HealthComponent::beforeCollision(std::shared_ptr<GameObject> collider) {
     }
 
     if(collider->getIdentifier() & 1){
-        health--;
-        for (auto listener : damageListeners) {
-            listener(1);
-        }
-        m_hurtSound->play();
-    }
-    if(health <= 0){
-        m_deathSound->play();
-        owner.lock()->makeDirty();
+        takeDamage(1);
     }
 }
 
@@ -52,3 +44,17 @@ void HealthComponent::restoreHealth() {
     }
 }
 
+void HealthComponent::takeDamage(int damage) {
+
+    health -= damage;
+    for (auto listener : damageListeners) {
+        listener(1);
+    }
+    m_hurtSound->play();
+
+    if(health <= 0){
+        m_deathSound->play();
+        owner.lock()->makeDirty();
+    }
+
+}

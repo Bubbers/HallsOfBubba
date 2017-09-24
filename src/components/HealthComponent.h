@@ -24,7 +24,9 @@ public:
 
     void restoreHealth();
 
-private:
+    void takeDamage(int damage);
+
+protected:
     int health;
     int maxHealth;
     std::vector<std::function<void(int)>> damageListeners;

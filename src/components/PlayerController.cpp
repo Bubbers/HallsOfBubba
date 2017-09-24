@@ -9,6 +9,7 @@
 #include <Globals.h>
 #include <ResourceManager.h>
 #include <Lights.h>
+#include <Logger.h>
 #include "PlayerController.h"
 #include "Camera.h"
 
@@ -16,7 +17,8 @@
 PlayerController::PlayerController(std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBulletFunc,
                                    std::function<void(std::weak_ptr<GameObject>, std::shared_ptr<Texture>)> spawnBlastBulletFunc,
                                    Camera *camera, std::shared_ptr<PointLight> light, ControlStatus::Activator activator) :
-        spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light), activator(activator){
+        spawnBulletFunc(spawnBulletFunc), spawnBlastBulletFunc(spawnBlastBulletFunc), camera(camera), light(light),
+        activator(activator), JumpingController(PLAYER_STRENGTH){
 
 }
 
@@ -99,12 +101,23 @@ void PlayerController::update(float dt) {
     if (owner.expired()) {
         return;
     }
+    JumpingController::update(dt);
 
     std::shared_ptr<GameObject> owner_ptr = owner.lock();
 
-    ControlsManager* cm = ControlsManager::getInstance();
-    ControlStatus horizontalStatus = cm->getStatus(MOVE_HORIZONTAL);
-    ControlStatus verticalStatus = cm->getStatus(MOVE_VERTICAL);
+    ControlsManager *cm = ControlsManager::getInstance();
+    movePlayer(dt, owner_ptr, cm);
+
+    handleShoots(dt, owner_ptr, cm);
+
+    rotateTowardsMouse(owner_ptr);
+
+}
+
+void PlayerController::movePlayer(float dt, std::shared_ptr<GameObject> &owner_ptr,
+                                   ControlsManager *controlsManager) {
+    ControlStatus horizontalStatus = controlsManager->getStatus(MOVE_HORIZONTAL);
+    ControlStatus verticalStatus = controlsManager->getStatus(MOVE_VERTICAL);
     chag::float3 prevLocation = owner_ptr->getRelativeLocation();
     locationAtLastUpdate = owner_ptr->getRelativeLocation();
     if(horizontalStatus.isActive(activator)){
@@ -114,7 +127,12 @@ void PlayerController::update(float dt) {
         prevLocation.z += verticalStatus.getValue(activator) / 30.0f * dt * 3.0f;
     }
     owner_ptr->setLocation(prevLocation);
+    if(controlsManager->getStatus(JUMP_BUTTON).isActive()) {
+        jump();
+    }
+}
 
+void PlayerController::handleShoots(float dt, std::shared_ptr<GameObject> &owner_ptr, ControlsManager *cm) {
     timeSinceLastShotAttackLMB += dt;
     if(timeSinceLastShotAttackLMB > 1.0f) {
         ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_LMB);
@@ -129,24 +147,27 @@ void PlayerController::update(float dt) {
         ControlStatus shootButton = cm->getStatus(SHOOT_BUTTON_RMB);
         if (shootButton.isActive(activator)) {
             for (int i = 0; i < 8; ++i) {
-                owner_ptr->setRotation(owner_ptr->getAbsoluteRotation() * chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
+                owner_ptr->setRotation(owner_ptr->getAbsoluteRotation() * make_quaternion_axis_angle(
+                        chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(45.0f * i)));
                 spawnBlastBulletFunc(owner, ResourceManager::loadAndFetchTexture("../assets/meshes/blast.png"));
             }
             timeSinceLastShotAttackRMB = 0.0f;
         }
     }
+}
 
+void PlayerController::rotateTowardsMouse(std::shared_ptr<GameObject> &owner_ptr) {
     auto targetLookAt = getPlaneIntersectionPoint();
 
-    chag::float3 vectorBetweenMouseAndPlayer = chag::normalize(targetLookAt - owner_ptr->getAbsoluteLocation());
+    chag::float3 vectorBetweenMouseAndPlayer = normalize(targetLookAt - owner_ptr->getAbsoluteLocation());
 
     chag::float3 defaultDir = chag::make_vector(0.0f, 0.0f, 1.0f);
-    float angle = (float)acos(chag::dot(defaultDir, vectorBetweenMouseAndPlayer));
+    float angle = (float)acos(dot(defaultDir, vectorBetweenMouseAndPlayer));
     if(vectorBetweenMouseAndPlayer.x < 0) {
         angle = -angle ;
     }
 
-    owner_ptr->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
+    owner_ptr->setRotation(make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), angle));
     light->position = owner_ptr->getAbsoluteLocation() + chag::make_vector(0.0f, 2.0f, 0.0f);
 }
 

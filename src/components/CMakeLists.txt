@@ -2,11 +2,14 @@ set(GAME_SOURCE_FILES
         components/ChangeRoomOnCollision.cpp
         components/PlayerController.cpp
         components/HealthComponent.cpp
+        components/PlayerHealthComponent.cpp
         components/EnemyComponent.cpp
         components/TimedLife.cpp
         components/DirtyBulletOnCollision.cpp
         components/BossController.cpp
         components/BossDeathWin.cpp
         components/HealOnRevivePoint.cpp
+        components/JumpingController.cpp
+        components/FatBossController.cpp
         ${GAME_SOURCE_FILES}
         PARENT_SCOPE)

@@ -5,6 +5,7 @@
 #include <constants.h>
 #include <ui/HealthBar.h>
 #include <components/BossDeathWin.h>
+#include <components/FatBossController.h>
 #include "BossRoom.h"
 #include "GameObject.h"
 
@@ -43,7 +44,7 @@ void BossRoom::createBoss() {
     bossObject->addChild(bossShieldObject);
 
     std::shared_ptr<HealthComponent> bossHealth = std::make_shared<HealthComponent>(6);
-    bossObject->addComponent(new BossController(spawnBullet, playerObjects));
+    bossObject->addComponent(new FatBossController(playerObjects, players));
     enemies.push_back(bossHealth);
     bossObject->addComponent(bossHealth.get());
     bossObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
@@ -77,7 +78,7 @@ std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::wea
     std::shared_ptr<HealthComponent> monsterHealth = std::make_shared<HealthComponent>(2);
 
     monsterObject->addComponent(new EnemyComponent(spawnBullet, playerObjects));
-    players.push_back(monsterHealth);
+    enemies.push_back(monsterHealth);
     monsterObject->addComponent(monsterHealth.get());
     monsterObject->setLocation(location);
     monsterObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), -6 * M_PI / 5));
