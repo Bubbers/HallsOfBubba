@@ -22,6 +22,8 @@ public:
     int getMaxHealth();
     int getHealth();
 
+    void restoreHealth();
+
 private:
     int health;
     int maxHealth;

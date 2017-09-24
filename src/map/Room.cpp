@@ -21,6 +21,7 @@
 #include <components/BossController.h>
 #include <Logger.h>
 #include <ControlStatus.h>
+#include <components/HealOnRevivePoint.h>
 #include "Room.h"
 #include "HallwayRoom.h"
 
@@ -308,6 +309,8 @@ void Room::loadPlayer(std::vector<std::shared_ptr<Player>> players, Direction en
             auto playerHealth = player->getHealthComponent();
             this->players.push_back(playerHealth);
             playerObject->addComponent(playerHealth.get());
+
+            playerObject->addComponent(new HealOnRevivePoint(playerHealth));
 
             switch (enteredDirection) {
                 case Direction::UP:

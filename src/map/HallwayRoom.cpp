@@ -104,11 +104,13 @@ void HallwayRoom::loadRevivePoint(chag::float3 locationOrigin) {
                                                                      "");
 
     std::shared_ptr<Mesh> reviveCircleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/revive.fbx");
-    std::shared_ptr<GameObject> reviveCircleObject = std::make_shared<GameObject>(reviveCircleMesh);
+    std::shared_ptr<Mesh> reviveCircleCollisionMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/1mcubeCollision.obj");
+    std::shared_ptr<GameObject> reviveCircleObject = std::make_shared<GameObject>(reviveCircleMesh,reviveCircleCollisionMesh);
+    reviveCircleObject->setIdentifier(REVIVE_POINT_IDENTIFIER);
+    reviveCircleObject->addCollidesWith(PLAYER_IDENTIFIER);
     StandardRenderer* stdReviveRenderer = new StandardRenderer(reviveCircleMesh, standardShader);
     reviveCircleObject->addRenderComponent(stdReviveRenderer);
     reviveCircleObject->setLocation(locationOrigin);
-
 
     std::shared_ptr<Mesh> reviveHealthMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/health.fbx");
     std::shared_ptr<GameObject> reviveHealthObject = std::make_shared<GameObject>(reviveHealthMesh);

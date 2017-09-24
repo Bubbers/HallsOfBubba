@@ -45,3 +45,7 @@ int HealthComponent::getMaxHealth() {
     return maxHealth;
 }
 
+void HealthComponent::restoreHealth() {
+    this->health = maxHealth;
+}
+
