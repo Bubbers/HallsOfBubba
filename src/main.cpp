@@ -14,6 +14,7 @@
 #include <statemachine/StateMachine.h>
 #include <actors/Player.h>
 #include <ui/Menu.h>
+#include <ui/Stats.h>
 #include "controls.h"
 #include <GameObject.h>
 
@@ -105,6 +106,21 @@ void initMenu() {
     roomGraph = nullptr;
 }
 
+unsigned int playTime = 0;
+unsigned int points = 0;
+
+void initStats() {
+    currentScene = std::make_shared<Scene>();
+    std::shared_ptr<GameObject> hudObj = std::make_shared<GameObject>();
+    HudRenderer *hudRenderer = new HudRenderer();
+    hudRenderer->setLayout(new Stats(playTime, points, [](){
+        statemachine->queueTransition(MENU);
+    }));
+    hudObj->addRenderComponent(hudRenderer);
+    currentScene->addTransparentObject(hudObj);
+    roomGraph = nullptr;
+}
+
 int main() {
     srand(time(NULL));
 
@@ -129,6 +145,9 @@ int main() {
     std::function<void()> initGame = []() {
         Logger::logInfo("New game");
 
+        playTime = 0;
+        points = 1337;
+
         if(numPlayers == 1) {
             players.push_back(std::make_shared<Player>(ControlStatus::Activator::ALL));
         } else if (numPlayers == 2) {
@@ -151,7 +170,7 @@ int main() {
 
     statemachine->connect(ACTIVE, INACTIVE, [&]() {
         Logger::logInfo("Stop game");
-
+        initStats();
     });
 
     createKeyListeners();
