@@ -41,7 +41,7 @@ void winCallback() {
 
 void loseCallback() {
     statemachine->queueTransition(INACTIVE);
-    statemachine->queueTransition(ACTIVE);
+    statemachine->queueTransition(MENU);
 };
 
 void idle(float timeSinceStart, float timeSinceLastCall) {
@@ -123,11 +123,6 @@ int main() {
     camera = std::make_shared<TopDownCamera>(chag::make_vector(0.0f, 0.0f, 0.0f),
                                              SCREEN_WIDTH,
                                              SCREEN_HEIGHT);
-
-    std::function<void()> allPlayersDead = [&] () {
-        statemachine->queueTransition(INACTIVE);
-        statemachine->queueTransition(MENU);
-    };
 
     std::function<void()> initGame = [&]() {
         Logger::logInfo("New game");
