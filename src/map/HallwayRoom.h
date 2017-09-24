@@ -31,6 +31,7 @@ private:
                                                std::vector<std::shared_ptr<GameObject>> playerObject,
                                                HudRenderer *hudRenderer,
                                                chag::float3 location);
+    void loadRevivePoint(chag::float3 locationOrigin);
 
     void randomlyGenerateObjectAtPos(chag::float3 location);
 };

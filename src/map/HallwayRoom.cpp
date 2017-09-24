@@ -96,19 +96,51 @@ void HallwayRoom::loadGameObjects() {
     randomlyGenerateObjectAtPos(chag::make_vector(-8.0f, 0.0f, -8.0f));
     randomlyGenerateObjectAtPos(chag::make_vector(8.0f, 0.0f, -8.0f));
     randomlyGenerateObjectAtPos(chag::make_vector(0.0f, 0.0f, 0.0f));
+}
+
+void HallwayRoom::loadRevivePoint(chag::float3 locationOrigin) {
+    auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
+                                                                     "",
+                                                                     "");
+
+    std::shared_ptr<Mesh> reviveCircleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/revive.fbx");
+    std::shared_ptr<GameObject> reviveCircleObject = std::make_shared<GameObject>(reviveCircleMesh);
+    StandardRenderer* stdReviveRenderer = new StandardRenderer(reviveCircleMesh, standardShader);
+    reviveCircleObject->addRenderComponent(stdReviveRenderer);
+    reviveCircleObject->setLocation(locationOrigin);
 
 
+    std::shared_ptr<Mesh> reviveHealthMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/health.fbx");
+    std::shared_ptr<GameObject> reviveHealthObject = std::make_shared<GameObject>(reviveHealthMesh);
+
+    StandardRenderer* stdReviveHealthRenderer = new StandardRenderer(reviveHealthMesh, standardShader);
+    reviveHealthObject->addRenderComponent(stdReviveHealthRenderer);
+
+    reviveHealthObject->setLocation(chag::make_vector(0.0f, 2.0f, 0.0f));
+    reviveHealthObject->setScale(chag::make_vector(0.6f, 0.6f, 0.6f));
+    reviveCircleObject->addChild(reviveHealthObject);
+
+    std::shared_ptr<SpotLight> spotLight = std::make_shared<SpotLight>();
+    spotLight->diffuseColor= chag::make_vector(0.50f,0.50f,0.20f);
+    spotLight->specularColor= chag::make_vector(0.00f,0.00f,0.00f);
+    spotLight->ambientColor= chag::make_vector(0.050f,0.050f,0.050f);
+    spotLight->position = locationOrigin + chag::make_vector(0.0f, 10.0f, -1.0f);
+    spotLight->direction = chag::make_vector(0.0f, -1.0f, 0.1f);
+    spotLight->cutOff = cosf(degreeToRad(3.0f));
+    spotLight->outerCutOff = cosf(degreeToRad(10.0f));
+
+    m_scene->spotLights.push_back(spotLight);
+
+    m_scene->addTransparentObject(reviveCircleObject);
 }
 
 void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
     auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
                                                                      "",
                                                                      "");
-    int randomNum = rand() % 5;
+    int randomNum = rand() % 6;
 
     if(randomNum == 0) {
-        auto obstacleMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/obstacle.obj");
-
         auto obstacleObject = getCrateObject();
         obstacleObject->setLocation(location);
         obstacleObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), degreeToRad(rand() % 360) ));
@@ -120,6 +152,8 @@ void HallwayRoom::randomlyGenerateObjectAtPos(chag::float3 location) {
         addCrates(location);
     } else if(randomNum == 3) {
         createTorch(location);
+    } else if(randomNum == 4) {
+        loadRevivePoint(location);
     }
 }
 
