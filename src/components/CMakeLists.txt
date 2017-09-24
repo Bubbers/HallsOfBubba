@@ -6,7 +6,6 @@ set(GAME_SOURCE_FILES
         components/TimedLife.cpp
         components/DirtyBulletOnCollision.cpp
         components/BossController.cpp
-        components/BossDeathWin.cpp
         components/HealOnRevivePoint.cpp
         ${GAME_SOURCE_FILES}
         PARENT_SCOPE)

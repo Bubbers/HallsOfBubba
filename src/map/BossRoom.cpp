@@ -4,11 +4,11 @@
 #include <components/BossController.h>
 #include <constants.h>
 #include <ui/HealthBar.h>
-#include <components/BossDeathWin.h>
+#include <components/ChangeRoomOnCollision.h>
 #include "BossRoom.h"
 #include "GameObject.h"
 
-BossRoom::BossRoom()
+BossRoom::BossRoom(walk_callback_t walkCallback) : walkCallback(walkCallback)
 {
     mapSymbol = "B";
 }
@@ -55,7 +55,6 @@ void BossRoom::createBoss() {
     bossObject->setDynamic(true);
     bossObject->setIdentifier(ENEMY_IDENTIFIER);
     bossObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
-    bossObject->addComponent(new BossDeathWin(hudRenderer));
 
     HealthBar* monsterHealthBar = new HealthBar(bossHealth);
     hudRenderer->addRelativeLayout(bossObject, monsterHealthBar);
@@ -92,5 +91,30 @@ std::shared_ptr<GameObject> BossRoom::getEnemyObject(std::function<void(std::wea
     hudRenderer->addRelativeLayout(monsterObject, monsterHealthBar);
 
     return monsterObject;
+}
+
+void BossRoom::update(float dt, lose_callback_t loseCallback) {
+
+    if(this->enemies.size() == 0 && !hasAddedNextLevelTeleport) {
+        auto standardShader = ResourceManager::loadAndFetchShaderProgram(SIMPLE_SHADER_NAME,
+                                                                         "",
+                                                                         "");
+        auto doorMesh = ResourceManager::loadAndFetchMesh("../assets/meshes/teleport.fbx");
+
+        auto doorObject = std::make_shared<GameObject>(doorMesh);
+        chag::float3 location = chag::make_vector(0.0f, 0.0f, 0.0f);
+
+
+        doorObject->setLocation(location);
+        StandardRenderer *stdDoorRenderer = new StandardRenderer(doorMesh, standardShader);
+        doorObject->addRenderComponent(stdDoorRenderer);
+        doorObject->addComponent(new ChangeRoomOnCollision(m_scene, [&]() -> void { walkCallback(NEXT_LEVEL); }));
+        doorObject->setIdentifier(DOOR_IDENTIFIER);
+
+        m_scene->addTransparentObject(doorObject);
+        hasAddedNextLevelTeleport = true;
+    }
+
+    Room::update(dt, loseCallback);
 }
 

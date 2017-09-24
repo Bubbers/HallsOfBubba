@@ -23,7 +23,7 @@ public:
 
     std::shared_ptr<Scene> getScene();
 
-    void update(float dt, lose_callback_t loseCallback);
+    virtual void update(float dt, lose_callback_t loseCallback);
 
     const std::string getMapSymbol();
 
