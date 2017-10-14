@@ -6,8 +6,12 @@
 #include <ui/HealthBar.h>
 #include <components/BossDeathWin.h>
 #include <components/FatBossController.h>
+#include <ParticleGenerator.h>
+#include <particles/PukeParticle.h>
+#include <ParticleRenderer.h>
 #include "BossRoom.h"
 #include "GameObject.h"
+#include "components/EnemyComponent.h"
 
 BossRoom::BossRoom()
 {
@@ -21,8 +25,8 @@ void BossRoom::loadGameObjects() {
     createTorch(chag::make_vector(8.0f, 0.0f, -8.0f));
     createBoss();
 
-    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(0.0f, 0.0f, 8.0f)));
-    m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(0.0f, 0.0f, -8.0f)));
+    //m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(0.0f, 0.0f, 8.0f)));
+    //m_scene->addShadowCaster(getEnemyObject(spawnBullet, playerObjects, hudRenderer, chag::make_vector(8.0f, 0.0f, 0.0f)));
 }
 
 void BossRoom::createBoss() {
@@ -43,8 +47,9 @@ void BossRoom::createBoss() {
     bossShieldObject->addRenderComponent(stdShieldRenderer);
     bossObject->addChild(bossShieldObject);
 
+    std::shared_ptr<PukeParticle> torchParticleConf = std::make_shared<PukeParticle>();
     std::shared_ptr<HealthComponent> bossHealth = std::make_shared<HealthComponent>(6);
-    bossObject->addComponent(new FatBossController(playerObjects, players));
+    bossObject->addComponent(new FatBossController(playerObjects, players, torchParticleConf));
     enemies.push_back(bossHealth);
     bossObject->addComponent(bossHealth.get());
     bossObject->setLocation(chag::make_vector(8.0f, 0.0f, 0.0f));
@@ -57,6 +62,17 @@ void BossRoom::createBoss() {
     bossObject->setIdentifier(ENEMY_IDENTIFIER);
     bossObject->addCollidesWith({PLAYER_SPAWNED_BULLET, WALL_IDENTIFIER, OBSTACLE_IDENTIFIER});
     bossObject->addComponent(new BossDeathWin(hudRenderer));
+
+    std::shared_ptr<Texture> particleTexture = ResourceManager::loadAndFetchTexture("../assets/meshes/puke.png");
+    std::shared_ptr<ParticleRenderer> torchParticleRenderer = std::make_shared<ParticleRenderer>(particleTexture, camera, ParticleRenderer::defaultShader());
+    ParticleGenerator *torchParticleGenerator = new ParticleGenerator(200, torchParticleRenderer, torchParticleConf, camera);
+    auto particleGeneratorObject = std::make_shared<GameObject>();
+    particleGeneratorObject->addRenderComponent(torchParticleGenerator);
+    particleGeneratorObject->setLocation(chag::make_vector(0.0f, 1.0f, 0.0f));
+    particleGeneratorObject->setRotation(chag::make_quaternion_axis_angle(chag::make_vector(0.0f, 1.0f, 0.0f), M_PI_2l));
+    particleGeneratorObject->initializeModelMatrix();
+    m_scene->addTransparentObject(particleGeneratorObject);
+    bossObject->addChild(particleGeneratorObject);
 
     HealthBar* monsterHealthBar = new HealthBar(bossHealth);
     hudRenderer->addRelativeLayout(bossObject, monsterHealthBar);

@@ -12,7 +12,7 @@ chag::float3 FirstAttackParticle::initialVelocity() {
     return chag::make_vector(getRand(-.5f, .5f),0.0f, getRand(-.5f, .5f));
 }
 
-chag::float3 FirstAttackParticle::accelerate(chag::float3 velocity) {
+chag::float3 FirstAttackParticle::accelerate(chag::float3 velocity, float dt) {
     return chag::make_vector(0.0f, 00.1f, 0.0f);
 }
 
@@ -26,8 +26,4 @@ chag::float3 FirstAttackParticle::calcParticleScale() {
 
 bool FirstAttackParticle::loop(float dt) {
     return looping;
-}
-
-void FirstAttackParticle::setLooping(bool value){
-    looping = value;
 }

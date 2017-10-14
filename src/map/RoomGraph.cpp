@@ -60,7 +60,9 @@ level_pos_t RoomGraph::getNextFromDir(Direction direction)
 void RoomGraph::generateGraph(walk_callback_t walkCallback)
 {
 
-    for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
+    graph[0][0][0] = std::make_shared<BossRoom>();
+    currentLevel = currentX = currentY = 0;
+    /*for (unsigned int level = 0; level < GRAPH_LEVELS; ++level) {
 
         levelStartPositions[level].first = (unsigned) rand() % GRAPH_WIDTH;
         levelStartPositions[level].second = 0;
@@ -77,7 +79,7 @@ void RoomGraph::generateGraph(walk_callback_t walkCallback)
         generatePath(startRoomPos, treasureRoomPos, level);
         generatePath(startRoomPos, bossRoomPos, level);
         generateDoors(walkCallback, level);
-    }
+    }*/
 
     enterNewLevel(0);
 }

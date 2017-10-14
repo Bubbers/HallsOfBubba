@@ -11,8 +11,8 @@ chag::float3 TorchParticle::initialVelocity() {
     return chag::make_vector(getRand(-.5f, .5f), getRand(0.0f, 100.0f), getRand(-.5f, .5f));
 }
 
-chag::float3 TorchParticle::accelerate(chag::float3 velocity) {
-    return chag::make_vector(0.0f, 50.1f, 0.0f);
+chag::float3 TorchParticle::accelerate(chag::float3 velocity, float dt) {
+    return velocity;
 }
 
 float TorchParticle::calcLifetime() {
@@ -25,8 +25,4 @@ chag::float3 TorchParticle::calcParticleScale() {
 
 bool TorchParticle::loop(float dt) {
     return looping;
-}
-
-void TorchParticle::setLooping(bool value){
-    looping = value;
 }

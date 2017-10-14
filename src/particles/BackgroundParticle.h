@@ -13,14 +13,12 @@ public:
     float3 initialPosition();
     float3 initialVelocity();
 
-    float3 accelerate(float3 velocity);
+    float3 accelerate(float3 velocity, float dt);
     float calcLifetime();
     float3 calcParticleScale();
     bool loop(float dt);
 
     GLuint blendFunc = GL_ONE;
-
-    void setLooping(bool value);
 private:
 };
 

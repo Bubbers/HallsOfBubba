@@ -11,8 +11,8 @@ float3 BackgroundParticle::initialVelocity() {
     return make_vector(getRand(-.5f, .5f), getRand(0.0f, 100.0f), getRand(-.5f, .5f));
 }
 
-float3 BackgroundParticle::accelerate(float3 velocity) {
-    return make_vector(0.0f, 50.1f, 0.0f);
+float3 BackgroundParticle::accelerate(float3 velocity, float dt) {
+    return velocity;
 }
 
 float BackgroundParticle::calcLifetime() {
@@ -25,8 +25,4 @@ float3 BackgroundParticle::calcParticleScale() {
 
 bool BackgroundParticle::loop(float dt) {
     return looping;
-}
-
-void BackgroundParticle::setLooping(bool value){
-    looping = value;
 }
